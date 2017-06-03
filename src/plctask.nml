@@ -1,0 +1,24 @@
+# plctask.nml
+# INPUT_FILENAME=plctask.cfg
+
+# Buffers:
+#       name 	   type  	      host 	size 	neut 	0 	buf# 	max_proc 	. . .
+B plcCommand 	SHMEM    	 localhost 	4160 	0 	* 	1 	* 	100 	TCP=5005  xdr 
+ 
+B  plcStatus 	SHMEM    	 localhost 	4160 	0 	* 	2 	* 	101 	TCP=5005  xdr 
+ 
+B   plcError 	SHMEM    	 localhost 	4224 	0 	* 	3 	* 	102 	TCP=5005  xdr  queue
+ 
+
+# Processes: 
+#       Name 	    Buffer 	      type 	      host 	       ops 	server 	timeout 	master 	c_num  	 . . .
+P     plcsvr 	plcCommand 	     LOCAL 	 localhost 	        RW 	1 	INF     	1 	0 	
+P     plcsvr 	 plcStatus 	     LOCAL 	 localhost 	        RW 	1 	INF     	1 	0 	
+P     plcsvr 	  plcError 	     LOCAL 	 localhost 	        RW 	1 	INF     	1 	0 	
+ 
+P        plc 	plcCommand 	     LOCAL 	 localhost 	         R 	0 	INF     	0 	1 	
+P        plc 	 plcStatus 	     LOCAL 	 localhost 	         W 	0 	INF     	0 	1 	
+P        plc 	  plcError 	     LOCAL 	 localhost 	         W 	0 	INF     	0 	1 	
+ 
+P    default 	   default 	      AUTO 	 localhost 	        RW 	0 	INF     	0 	0 	
+
