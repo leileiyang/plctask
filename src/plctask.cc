@@ -7,13 +7,18 @@
 
 
 PLCTask::PLCTask(double sleep_time):
+    exec_state_(PLC_TASK_EXEC_DONE),
     state_(PLC_STATE_IDLE),
     timer_(sleep_time),
     running_(true),
     plc_cmd_buffer_(NULL),
     plc_stat_buffer_(NULL),
     plc_err_buffer_(NULL),
-    plc_command_(NULL) {}
+    plc_command_(NULL),
+    plc_status_(NULL),
+    plc_task_cmd_(NULL),
+    plan_error_(0),
+    execute_error_(0) {}
 
 PLCTask::~PLCTask() {}
 
@@ -86,14 +91,105 @@ int PLCTask::Startup(std::string plc_nmlfile) {
   if (!good) {
     return false;
   }
-  //plc_status_ = new RCS_STAT_MSG;
+  plc_status_ = new PLC_STAT;
 
   return true;
 
 }
 
-int PLCTask::Plan() {
+int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
   return 0;
+}
+
+int PLCTask::TaskQueueCommand(NMLmsg *cmd) {
+  if (cmd == 0) {
+    return 0;
+  }
+  plc_list_.append(cmd);
+  return 0;
+}
+
+
+int PLCTask::Plan() {
+  NMLTYPE type;
+  int retval = 0;
+  // check for new command
+  if (plc_command_->serial_number != plc_status_->echo_serial_number) {
+    type = plc_command_->type;
+  } else {
+    type = 0;
+  }
+
+  switch (type) {
+    // no command
+    case 0:
+      break;
+      // immediate command
+      // queue command
+    default:
+      break;
+  }
+  return 0;
+}
+
+int PLCTask::Execute() {
+  int retval = 0;
+  switch (exec_state_) {
+    case PLC_TASK_EXEC_ERROR:
+      plc_list_.clear();
+      exec_state_ = PLC_TASK_EXEC_DONE;
+      break;
+    case PLC_TASK_EXEC_DONE:
+      if (0 == plc_task_cmd_) {
+        plc_task_cmd_ = plc_list_.get();
+        if (0 != plc_task_cmd_) {
+          exec_state_ = (enum PLC_TASK_EXEC_ENUM)
+              TaskCheckPreconditions(plc_task_cmd_);
+
+        }
+      } else {
+        if (0 != TaskIssueCommand(plc_task_cmd_)) {
+          exec_state_ = PLC_TASK_EXEC_ERROR;
+          retval = -1;
+        } else {
+          exec_state_ = (enum PLC_TASK_EXEC_ENUM)
+              TaskCheckPostconditions(plc_task_cmd_);
+
+        }
+        plc_task_cmd_ = 0;
+      }
+      break;
+    case PLC_TASK_EXEC_WAITING_FOR_DEVICES:
+
+      break;
+    default:
+      break;
+  }
+  return 0;
+}
+
+
+int PLCTask::TaskCheckPreconditions(NMLmsg *cmd) {
+  if (0 == cmd) {
+    return PLC_TASK_EXEC_DONE;
+  }
+  switch (cmd->type) {
+    default:
+      return PLC_TASK_EXEC_WAITING_FOR_DEVICES;
+  }
+  return PLC_TASK_EXEC_DONE;
+}
+
+int PLCTask::TaskCheckPostconditions(NMLmsg *cmd) {
+  if (0 == cmd) {
+    return PLC_TASK_EXEC_DONE;
+  }
+  switch (cmd->type) {
+    default:
+      return PLC_TASK_EXEC_DONE;
+  }
+  return PLC_TASK_EXEC_DONE;
+
 }
 
 bool PLCTask::Run() {
@@ -104,7 +200,21 @@ bool PLCTask::Run() {
     /// Job
     // 1 read a command
     if (0 != plc_cmd_buffer_->peek()) {
+      plan_error_ = 0;
+      execute_error_ = 0;
     }
+    if (0 != Plan()) {
+      plan_error_ = 0;
+    }
+    if (0 != Execute()) {
+      execute_error_ = 0;
+    }
+
+    UpdateDevicesStatus();
+
+    // do top level
+    plc_status_->echo_serial_number = plc_command_->serial_number;
+    plc_status_->command_type = plc_command_->type;
     
     std::cout << end_time - start_time << std::endl; 
     start_time = end_time;
@@ -129,4 +239,8 @@ void PLCTask::Shutdown() {
     delete plc_cmd_buffer_;
     plc_cmd_buffer_ = NULL;
   }
+}
+
+int PLCTask::UpdateDevicesStatus() {
+  return 0;
 }

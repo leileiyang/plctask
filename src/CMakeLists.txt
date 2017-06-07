@@ -11,3 +11,6 @@ endforeach (FILE)
 
 add_executable (plctask plctask.cc plctaskmain.cc ${nml_intf_files})
 target_link_libraries (plctask rcs)
+
+add_executable (plcsvr plcsvr.cc ${nml_intf_files})
+target_link_libraries (plcsvr rcs)

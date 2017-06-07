@@ -7,6 +7,7 @@
 #include <stat_msg.hh>
 
 #include "nml_intf/interpl.hh"
+#include "nml_intf/plc_nml.hh"
 
 enum PLC_STATE_ENUM {
   PLC_STATE_IDLE = 1,
@@ -15,6 +16,14 @@ enum PLC_STATE_ENUM {
   PLC_STATE_WAITING = 4,
 
 };
+
+enum PLC_TASK_EXEC_ENUM {
+  PLC_TASK_EXEC_ERROR = 1,
+  PLC_TASK_EXEC_DONE = 2,
+  PLC_TASK_EXEC_WAITING_FOR_DEVICES = 3,
+
+};
+
 
 
 class PLCTask {
@@ -27,6 +36,7 @@ class PLCTask {
   int Startup(std::string plc_nmlfile);
 
  private:
+  PLC_TASK_EXEC_ENUM exec_state_;
   PLC_STATE_ENUM state_;
   RCS_TIMER timer_;
   NML_INTERP_LIST plc_list_;
@@ -39,10 +49,18 @@ class PLCTask {
 
   // communication message
   RCS_CMD_MSG *plc_command_;
-  //RCS_STAT_MSG *plc_status_;
+  PLC_STAT *plc_status_;
+  NMLmsg *plc_task_cmd_;
+  int plan_error_;
+  int execute_error_;
 
   int Plan();
   int Execute();
+  int TaskIssueCommand(NMLmsg *cmd);
+  int TaskQueueCommand(NMLmsg *cmd);
+  int TaskCheckPreconditions(NMLmsg *cmd);
+  int TaskCheckPostconditions(NMLmsg *cmd);
+  int UpdateDevicesStatus();
 
 };
 
