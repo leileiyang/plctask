@@ -5,7 +5,7 @@
 
 int main() {
   int i = 3;
-  PLCClient client(1);
+  PLCClient client(0.01);
   int ret = client.Startup("plctask.nml");
   FIRST_CMD_MSG msg;
   msg.x = 1;
