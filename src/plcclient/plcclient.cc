@@ -5,6 +5,7 @@
 
 #include <iostream>
 
+int PLCClient::try_count = 3;
 
 PLCClient::PLCClient(double sleep_time):
     timer_(sleep_time),
@@ -109,5 +110,13 @@ void PLCClient::Shutdown() {
 }
 
 int PLCClient::SendMsg(RCS_CMD_MSG &msg) {
+  int i = 0;
+  while ((plc_cmd_buffer_->check_if_read() == 0) && i < try_count ) {
+    i++;
+    timer_.wait();
+  }
+  if (i == try_count) {
+    return Timeout;
+  }
   return plc_cmd_buffer_->write(msg); 
 }
