@@ -127,6 +127,8 @@ int PLCTask::Plan() {
       // immediate command
       // queue command
     case TEST_CMD_MSG_TYPE:
+    case FIRST_CMD_MSG_TYPE:
+    case SECOND_CMD_MSG_TYPE:
       TaskQueueCommand(plc_command_);
       break;
     default:
@@ -177,6 +179,10 @@ int PLCTask::TaskCheckPreconditions(NMLmsg *cmd) {
     return PLC_TASK_EXEC_DONE;
   }
   switch (cmd->type) {
+    case TEST_CMD_MSG_TYPE:
+    case FIRST_CMD_MSG_TYPE:
+    case SECOND_CMD_MSG_TYPE:
+      return PLC_TASK_EXEC_DONE;
     default:
       return PLC_TASK_EXEC_WAITING_FOR_DEVICES;
   }

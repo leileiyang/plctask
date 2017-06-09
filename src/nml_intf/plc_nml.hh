@@ -27,6 +27,22 @@ class TEST_CMD_MSG: public RCS_CMD_MSG {
    int x;
 };
 
+class FIRST_CMD_MSG: public RCS_CMD_MSG {
+ public:
+   FIRST_CMD_MSG();
+
+   void update(CMS *cms);
+   int x;
+};
+
+class SECOND_CMD_MSG: public RCS_CMD_MSG {
+ public:
+   SECOND_CMD_MSG();
+
+   void update(CMS *cms);
+   int x;
+};
+
 int plcFormat(NMLTYPE type, void *buffer, CMS *cms);
 
 #endif

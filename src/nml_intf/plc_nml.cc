@@ -26,15 +26,19 @@
 
 
 #ifndef PLCNAME_LIST_LENGTH
-#define PLCNAME_LIST_LENGTH 3
+#define PLCNAME_LIST_LENGTH 5
 #endif
 
 const NMLTYPE plcid_list[PLCNAME_LIST_LENGTH]= {
-	PLC_STAT_TYPE, /* 0,101 */
-	TEST_CMD_MSG_TYPE, /* 2,102 */
+	FIRST_CMD_MSG_TYPE, /* 0,103 */
+	PLC_STAT_TYPE, /* 1,101 */
+	SECOND_CMD_MSG_TYPE, /* 3,104 */
+	TEST_CMD_MSG_TYPE, /* 4,102 */
 	-1};
 const size_t plcsize_list[PLCNAME_LIST_LENGTH]= {
+	sizeof(FIRST_CMD_MSG),
 	sizeof(PLC_STAT),
+	sizeof(SECOND_CMD_MSG),
 	sizeof(TEST_CMD_MSG),
 	0};
 
@@ -42,8 +46,10 @@ const size_t plcsize_list[PLCNAME_LIST_LENGTH]= {
 // Enumerated Type Constants
 
 /*
+Estimated_size	FIRST_CMD_MSG	32
 Estimated_size	PLC_STAT	136
 Estimated_size	PLC_STAT_MSG	128
+Estimated_size	SECOND_CMD_MSG	32
 Estimated_size	TEST_CMD_MSG	32
 Estimated_size	MAXIMUM	136
 */
@@ -62,8 +68,14 @@ int plcFormat(NMLTYPE type, void *buffer, CMS *cms)
 
 	switch(type)
 	{
+	case FIRST_CMD_MSG_TYPE:
+		((FIRST_CMD_MSG *) buffer)->update(cms);
+		break;
 	case PLC_STAT_TYPE:
 		((PLC_STAT *) buffer)->update(cms);
+		break;
+	case SECOND_CMD_MSG_TYPE:
+		((SECOND_CMD_MSG *) buffer)->update(cms);
 		break;
 	case TEST_CMD_MSG_TYPE:
 		((TEST_CMD_MSG *) buffer)->update(cms);
@@ -74,6 +86,22 @@ int plcFormat(NMLTYPE type, void *buffer, CMS *cms)
 	}
 	return 1;
 }
+
+/*
+*	NML/CMS Update function for FIRST_CMD_MSG
+*	from plc_nml.hh:28
+*/
+void FIRST_CMD_MSG::update(CMS *cms)
+{
+
+	cms->beginClass("FIRST_CMD_MSG","RCS_CMD_MSG");
+	RCS_CMD_MSG::update_cmd_msg_base(cms);
+	cms->update_with_name("x",x);
+
+	cms->endClass("FIRST_CMD_MSG","RCS_CMD_MSG");
+
+}
+
 
 /*
 *	NML/CMS Update function for PLC_STAT
@@ -112,6 +140,22 @@ void PLC_STAT_MSG::update(CMS *cms)
 
 
 /*
+*	NML/CMS Update function for SECOND_CMD_MSG
+*	from plc_nml.hh:36
+*/
+void SECOND_CMD_MSG::update(CMS *cms)
+{
+
+	cms->beginClass("SECOND_CMD_MSG","RCS_CMD_MSG");
+	RCS_CMD_MSG::update_cmd_msg_base(cms);
+	cms->update_with_name("x",x);
+
+	cms->endClass("SECOND_CMD_MSG","RCS_CMD_MSG");
+
+}
+
+
+/*
 *	NML/CMS Update function for TEST_CMD_MSG
 *	from plc_nml.hh:20
 */
@@ -127,11 +171,33 @@ void TEST_CMD_MSG::update(CMS *cms)
 }
 
 /*
+*	Constructor for FIRST_CMD_MSG
+*	from plc_nml.hh:28
+*/
+FIRST_CMD_MSG::FIRST_CMD_MSG()
+	: RCS_CMD_MSG(FIRST_CMD_MSG_TYPE,sizeof(FIRST_CMD_MSG))
+{
+	x = (int) 0;
+
+}
+
+/*
 *	Constructor for PLC_STAT
 *	from plc_nml.hh:12
 */
 PLC_STAT::PLC_STAT()
 	: PLC_STAT_MSG(PLC_STAT_TYPE,sizeof(PLC_STAT))
+{
+	x = (int) 0;
+
+}
+
+/*
+*	Constructor for SECOND_CMD_MSG
+*	from plc_nml.hh:36
+*/
+SECOND_CMD_MSG::SECOND_CMD_MSG()
+	: RCS_CMD_MSG(SECOND_CMD_MSG_TYPE,sizeof(SECOND_CMD_MSG))
 {
 	x = (int) 0;
 
