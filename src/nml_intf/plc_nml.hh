@@ -43,6 +43,44 @@ class SECOND_CMD_MSG: public RCS_CMD_MSG {
    int x;
 };
 
+class G_ORDER_MSG: public RCS_CMD_MSG {
+ public:
+  G_ORDER_MSG();
+  void update(CMS *cms);
+
+  unsigned int show_line_;
+  unsigned int line_no_in_total_file_;
+  unsigned int name_;
+  unsigned int m_type_;
+  unsigned short piercing_hole_;
+
+  double x0_;
+  double y0_;
+  double x_;
+  double y_;
+  double i_;
+  double j_;
+  double f_;
+  double r_;
+
+  float start_angle_;
+  float end_angle_;
+  float length_;
+  float angle_ration;
+
+  double offset_m07_;
+  double offset_m08_;
+
+};
+
+class G_CODE_MSG: public RCS_CMD_MSG {
+ public:
+  G_CODE_MSG();
+  void update(CMS *cms);
+
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(G_ORDER_MSG, gcode_array_, 30);
+};
+
 int plcFormat(NMLTYPE type, void *buffer, CMS *cms);
 
 #endif
