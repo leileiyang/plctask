@@ -3,7 +3,7 @@
 
 # Buffers:
 #       name 	   type  	      host 	size 	neut 	0 	buf# 	max_proc 	. . .
-B plcCommand 	SHMEM    	10.1.0.112 	4160 	0 	* 	1 	* 	100 	TCP=5005  confirm_write xdr 
+B plcCommand 	SHMEM    	10.1.0.112 	4160 	0 	* 	1 	* 	100 	TCP=5005  xdr 
  
 B  plcStatus 	SHMEM    	10.1.0.112 	4160 	0 	* 	2 	* 	101 	TCP=5005  xdr 
  
