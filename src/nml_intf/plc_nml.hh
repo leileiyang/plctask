@@ -16,6 +16,15 @@ class PLC_STAT: public PLC_STAT_MSG {
    PLC_STAT();
 
    void update(CMS *cms);
+   int x;
+};
+
+class TEST_CMD_MSG: public RCS_CMD_MSG {
+ public:
+   TEST_CMD_MSG();
+
+   void update(CMS *cms);
+   int x;
 };
 
 int plcFormat(NMLTYPE type, void *buffer, CMS *cms);

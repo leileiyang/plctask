@@ -20,5 +20,9 @@ P        plc 	plcCommand 	     LOCAL 	 localhost 	         R 	0 	INF     	0 	1
 P        plc 	 plcStatus 	     LOCAL 	 localhost 	         W 	0 	INF     	0 	1 	
 P        plc 	  plcError 	     LOCAL 	 localhost 	         W 	0 	INF     	0 	1 	
  
+P  plcClient 	plcCommand 	     LOCAL 	 localhost 	         W 	0 	INF     	0 	2 	
+P  plcClient 	 plcStatus 	     LOCAL 	 localhost 	         R 	0 	INF     	0 	2 	
+P  plcClient 	  plcError 	     LOCAL 	 localhost 	         W 	0 	INF     	0 	2 	
+ 
 P    default 	   default 	      AUTO 	 localhost 	        RW 	0 	INF     	0 	0 	
 

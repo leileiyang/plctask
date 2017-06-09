@@ -126,6 +126,9 @@ int PLCTask::Plan() {
       break;
       // immediate command
       // queue command
+    case TEST_CMD_MSG_TYPE:
+      TaskQueueCommand(plc_command_);
+      break;
     default:
       break;
   }
@@ -216,7 +219,7 @@ bool PLCTask::Run() {
     plc_status_->echo_serial_number = plc_command_->serial_number;
     plc_status_->command_type = plc_command_->type;
     
-    std::cout << end_time - start_time << std::endl; 
+    //std::cout << end_time - start_time << std::endl;
     start_time = end_time;
     timer_.wait();
   }

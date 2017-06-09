@@ -14,7 +14,8 @@ static NML *plcErrorChannel = NULL;
 
 int main(int argc, char *argv[]) {
   double start_time = etime();
-  char *plc_nmlfile = argv[1];
+  //char *plc_nmlfile = argv[1];
+  const char *plc_nmlfile = "plctask.nml";
   while (fabs(etime() - start_time) < 10.0 && (plcCommandChannel == NULL ||
       plcStatusChannel == NULL || plcErrorChannel == NULL)) {
 

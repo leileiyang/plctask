@@ -26,23 +26,26 @@
 
 
 #ifndef PLCNAME_LIST_LENGTH
-#define PLCNAME_LIST_LENGTH 2
+#define PLCNAME_LIST_LENGTH 3
 #endif
 
 const NMLTYPE plcid_list[PLCNAME_LIST_LENGTH]= {
 	PLC_STAT_TYPE, /* 0,101 */
+	TEST_CMD_MSG_TYPE, /* 2,102 */
 	-1};
 const size_t plcsize_list[PLCNAME_LIST_LENGTH]= {
 	sizeof(PLC_STAT),
+	sizeof(TEST_CMD_MSG),
 	0};
 
 
 // Enumerated Type Constants
 
 /*
-Estimated_size	PLC_STAT	128
+Estimated_size	PLC_STAT	136
 Estimated_size	PLC_STAT_MSG	128
-Estimated_size	MAXIMUM	128
+Estimated_size	TEST_CMD_MSG	32
+Estimated_size	MAXIMUM	136
 */
 /*
 *	NML/CMS Format function : plcFormat
@@ -61,6 +64,9 @@ int plcFormat(NMLTYPE type, void *buffer, CMS *cms)
 	{
 	case PLC_STAT_TYPE:
 		((PLC_STAT *) buffer)->update(cms);
+		break;
+	case TEST_CMD_MSG_TYPE:
+		((TEST_CMD_MSG *) buffer)->update(cms);
 		break;
 
 	default:
@@ -82,6 +88,7 @@ void PLC_STAT::update(CMS *cms)
 	PLC_STAT_MSG::update(cms);
 	cms->endBaseClass("PLC_STAT_MSG");
 
+	cms->update_with_name("x",x);
 
 	cms->endClass("PLC_STAT","PLC_STAT_MSG");
 
@@ -103,6 +110,22 @@ void PLC_STAT_MSG::update(CMS *cms)
 
 }
 
+
+/*
+*	NML/CMS Update function for TEST_CMD_MSG
+*	from plc_nml.hh:20
+*/
+void TEST_CMD_MSG::update(CMS *cms)
+{
+
+	cms->beginClass("TEST_CMD_MSG","RCS_CMD_MSG");
+	RCS_CMD_MSG::update_cmd_msg_base(cms);
+	cms->update_with_name("x",x);
+
+	cms->endClass("TEST_CMD_MSG","RCS_CMD_MSG");
+
+}
+
 /*
 *	Constructor for PLC_STAT
 *	from plc_nml.hh:12
@@ -110,6 +133,18 @@ void PLC_STAT_MSG::update(CMS *cms)
 PLC_STAT::PLC_STAT()
 	: PLC_STAT_MSG(PLC_STAT_TYPE,sizeof(PLC_STAT))
 {
+	x = (int) 0;
+
+}
+
+/*
+*	Constructor for TEST_CMD_MSG
+*	from plc_nml.hh:20
+*/
+TEST_CMD_MSG::TEST_CMD_MSG()
+	: RCS_CMD_MSG(TEST_CMD_MSG_TYPE,sizeof(TEST_CMD_MSG))
+{
+	x = (int) 0;
 
 }
 
