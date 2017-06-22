@@ -12,17 +12,12 @@
 
 class PLCClient {
  public:
-  enum SendResult {
-    ERROR = -1,
-    SUCCESS = 0,
-    TIMEOUT = 1
-  };
  public:
   PLCClient(double sleep_time);
   ~PLCClient();
 
   int Startup(std::string plc_nmlfile);
-  int SendMsg(RCS_CMD_MSG &);
+  int SendMsg(RCS_CMD_MSG &msg, int instancy = 0);
   void Shutdown();
 
  private:

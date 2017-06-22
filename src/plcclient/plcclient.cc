@@ -13,7 +13,7 @@ PLCClient::PLCClient(double sleep_time):
     plc_cmd_buffer_(NULL),
     plc_stat_buffer_(NULL),
     plc_err_buffer_(NULL),
-    send_engine_(this, sleep_time) {}
+    send_engine_(sleep_time) {}
 
 PLCClient::~PLCClient() {
   Shutdown();
@@ -88,6 +88,7 @@ int PLCClient::Startup(std::string plc_nmlfile) {
     return false;
   }
   // Start the send message thread
+  send_engine_.SetCmdChannel(plc_cmd_buffer_);
   send_engine_.Run();
   return true;
 
@@ -112,14 +113,6 @@ void PLCClient::Shutdown() {
   }
 }
 
-int PLCClient::SendMsg(RCS_CMD_MSG &msg) {
-  int i = 0;
-  while ((plc_cmd_buffer_->check_if_read() == 0) && i < try_count ) {
-    i++;
-    timer_.wait();
-  }
-  if (i == try_count) {
-    return TIMEOUT;
-  }
-  return plc_cmd_buffer_->write(msg); 
+int PLCClient::SendMsg(RCS_CMD_MSG &msg, int instancy) {
+  return send_engine_.AppendMsg(&msg, instancy);
 }

@@ -7,19 +7,24 @@
 
 #include "nml_intf/interpl.hh"
 
-class PLCClient;
-
 class SendMsgEngine {
+  enum SendResult {
+    ERROR = -1,
+    SUCCESS = 0,
+    TIMEOUT = 1
+  };
+
  public:
-  SendMsgEngine(PLCClient *client, double interval);
+  SendMsgEngine(double interval);
   int AppendMsg(RCS_CMD_MSG *msg, int instancy = 0);
+  void SetCmdChannel(RCS_CMD_CHANNEL *cmd_channel);
   void Run();
   void Exit();
 
  private:
-  PLCClient *client_;
   RCS_TIMER timer_;
   bool exit_;
+  RCS_CMD_CHANNEL *cmd_channel_;
   
   NML_INTERP_LIST imme_msgs_;
   NML_INTERP_LIST comm_msgs_;
@@ -28,6 +33,8 @@ class SendMsgEngine {
   pthread_mutex_t comm_mutex_;
 
   const static int kRetryCount;
+
+  int SendMsg(RCS_CMD_MSG &msg);
 
 };
 
