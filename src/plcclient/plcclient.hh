@@ -8,12 +8,14 @@
 
 #include "nml_intf/interpl.hh"
 #include "nml_intf/plc_nml.hh"
+#include "sendmsgengine.hh"
 
 class PLCClient {
+ public:
   enum SendResult {
-    Error = -1,
-    Success = 0,
-    Timeout = 1
+    ERROR = -1,
+    SUCCESS = 0,
+    TIMEOUT = 1
   };
  public:
   PLCClient(double sleep_time);
@@ -31,6 +33,7 @@ class PLCClient {
   RCS_CMD_CHANNEL *plc_cmd_buffer_;
   RCS_STAT_CHANNEL *plc_stat_buffer_;
   NML *plc_err_buffer_;
+  SendMsgEngine send_engine_;
 
   static int try_count;
 
