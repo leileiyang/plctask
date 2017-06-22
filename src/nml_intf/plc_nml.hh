@@ -2,6 +2,7 @@
 #define PLC_NML_HH_
 
 #include <stat_msg.hh>
+#include <cmd_msg.hh>
 #include "plc.hh"
 
 class PLC_STAT_MSG: public RCS_STAT_MSG {
