@@ -19,6 +19,7 @@ int main() {
     ret = client.SendMsg(msg2);
     std::cout << ret << std::endl;
   }
+  std::cin >> i;
   return 0;
 
 }

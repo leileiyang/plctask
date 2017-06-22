@@ -89,7 +89,7 @@ int PLCClient::Startup(std::string plc_nmlfile) {
   }
   // Start the send message thread
   send_engine_.SetCmdChannel(plc_cmd_buffer_);
-  send_engine_.Run();
+  send_engine_.Start();
   return true;
 
 }

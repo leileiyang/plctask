@@ -18,6 +18,7 @@ class SendMsgEngine {
   SendMsgEngine(double interval);
   int AppendMsg(RCS_CMD_MSG *msg, int instancy = 0);
   void SetCmdChannel(RCS_CMD_CHANNEL *cmd_channel);
+  void Start();
   void Run();
   void Exit();
 

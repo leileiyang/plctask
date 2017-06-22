@@ -4,6 +4,12 @@
 
 const int SendMsgEngine::kRetryCount = 3;
 
+void *SendMessage(void *args) {
+  SendMsgEngine *engine = (SendMsgEngine *)args;
+  engine->Run();
+  return NULL;
+}
+
 SendMsgEngine::SendMsgEngine(double interval):
     timer_(interval), exit_(false), cmd_channel_(NULL) {
 
@@ -85,3 +91,9 @@ void SendMsgEngine::Run() {
     timer_.wait();
   }
 }
+
+void SendMsgEngine::Start() {
+  pthread_t thread_id;
+  pthread_create(&thread_id, NULL, &SendMessage, this);
+}
+
