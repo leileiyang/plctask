@@ -12,9 +12,10 @@ include_directories ("${PROJECT_SOURCE_DIR}/plcclient")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/nml_intf")
 
 add_executable (plctask plctask.cc plctaskmain.cc)
-target_link_libraries (plctask rcs plcmsg)
+target_link_libraries (plctask plcmsg)
 
 add_subdirectory ("${PROJECT_SOURCE_DIR}/plcclient")
+add_subdirectory ("${PROJECT_SOURCE_DIR}/gcode")
 
 add_executable (plcsvr plcsvr.cc)
-target_link_libraries (plcsvr rcs plcmsg)
+target_link_libraries (plcsvr plcmsg)

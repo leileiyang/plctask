@@ -26,17 +26,21 @@
 
 
 #ifndef PLCNAME_LIST_LENGTH
-#define PLCNAME_LIST_LENGTH 5
+#define PLCNAME_LIST_LENGTH 7
 #endif
 
 const NMLTYPE plcid_list[PLCNAME_LIST_LENGTH]= {
 	FIRST_CMD_MSG_TYPE, /* 0,103 */
-	PLC_STAT_TYPE, /* 1,101 */
-	SECOND_CMD_MSG_TYPE, /* 3,104 */
-	TEST_CMD_MSG_TYPE, /* 4,102 */
+	G_CODE_MSG_TYPE, /* 1,106 */
+	G_ORDER_MSG_TYPE, /* 2,105 */
+	PLC_STAT_TYPE, /* 3,101 */
+	SECOND_CMD_MSG_TYPE, /* 5,104 */
+	TEST_CMD_MSG_TYPE, /* 6,102 */
 	-1};
 const size_t plcsize_list[PLCNAME_LIST_LENGTH]= {
 	sizeof(FIRST_CMD_MSG),
+	sizeof(G_CODE_MSG),
+	sizeof(G_ORDER_MSG),
 	sizeof(PLC_STAT),
 	sizeof(SECOND_CMD_MSG),
 	sizeof(TEST_CMD_MSG),
@@ -47,11 +51,13 @@ const size_t plcsize_list[PLCNAME_LIST_LENGTH]= {
 
 /*
 Estimated_size	FIRST_CMD_MSG	32
+Estimated_size	G_CODE_MSG	4840
+Estimated_size	G_ORDER_MSG	160
 Estimated_size	PLC_STAT	136
 Estimated_size	PLC_STAT_MSG	128
 Estimated_size	SECOND_CMD_MSG	32
 Estimated_size	TEST_CMD_MSG	32
-Estimated_size	MAXIMUM	136
+Estimated_size	MAXIMUM	4840
 */
 /*
 *	NML/CMS Format function : plcFormat
@@ -70,6 +76,12 @@ int plcFormat(NMLTYPE type, void *buffer, CMS *cms)
 	{
 	case FIRST_CMD_MSG_TYPE:
 		((FIRST_CMD_MSG *) buffer)->update(cms);
+		break;
+	case G_CODE_MSG_TYPE:
+		((G_CODE_MSG *) buffer)->update(cms);
+		break;
+	case G_ORDER_MSG_TYPE:
+		((G_ORDER_MSG *) buffer)->update(cms);
 		break;
 	case PLC_STAT_TYPE:
 		((PLC_STAT *) buffer)->update(cms);
@@ -99,6 +111,64 @@ void FIRST_CMD_MSG::update(CMS *cms)
 	cms->update_with_name("x",x);
 
 	cms->endClass("FIRST_CMD_MSG","RCS_CMD_MSG");
+
+}
+
+
+/*
+*	NML/CMS Update function for G_CODE_MSG
+*	from plc_nml.hh:74
+*/
+void G_CODE_MSG::update(CMS *cms)
+{
+
+	cms->beginClass("G_CODE_MSG","RCS_CMD_MSG");
+	RCS_CMD_MSG::update_cmd_msg_base(cms);
+	cms->update_dla_length_with_name("gcode_array__length",gcode_array__length);
+	cms->beginStructDynamicArray("gcode_array_",gcode_array__length,30);
+	for(int i_gcode_array_ = 0;i_gcode_array_ < gcode_array__length ;i_gcode_array_++)
+	{
+		cms->beginStructArrayElem("gcode_array_",i_gcode_array_);
+		gcode_array_[i_gcode_array_].update(cms);
+		cms->endStructArrayElem("gcode_array_",i_gcode_array_);
+	}
+	cms->endStructDynamicArray("gcode_array_",gcode_array__length,30);
+
+	cms->endClass("G_CODE_MSG","RCS_CMD_MSG");
+
+}
+
+
+/*
+*	NML/CMS Update function for G_ORDER_MSG
+*	from plc_nml.hh:44
+*/
+void G_ORDER_MSG::update(CMS *cms)
+{
+
+	cms->beginClass("G_ORDER_MSG","RCS_CMD_MSG");
+	RCS_CMD_MSG::update_cmd_msg_base(cms);
+	cms->update_with_name("show_line_",show_line_);
+	cms->update_with_name("line_no_in_total_file_",line_no_in_total_file_);
+	cms->update_with_name("name_",name_);
+	cms->update_with_name("m_type_",m_type_);
+	cms->update_with_name("piercing_hole_",piercing_hole_);
+	cms->update_with_name("x0_",x0_);
+	cms->update_with_name("y0_",y0_);
+	cms->update_with_name("x_",x_);
+	cms->update_with_name("y_",y_);
+	cms->update_with_name("i_",i_);
+	cms->update_with_name("j_",j_);
+	cms->update_with_name("f_",f_);
+	cms->update_with_name("r_",r_);
+	cms->update_with_name("start_angle_",start_angle_);
+	cms->update_with_name("end_angle_",end_angle_);
+	cms->update_with_name("length_",length_);
+	cms->update_with_name("angle_ration",angle_ration);
+	cms->update_with_name("offset_m07_",offset_m07_);
+	cms->update_with_name("offset_m08_",offset_m08_);
+
+	cms->endClass("G_ORDER_MSG","RCS_CMD_MSG");
 
 }
 
@@ -178,6 +248,46 @@ FIRST_CMD_MSG::FIRST_CMD_MSG()
 	: RCS_CMD_MSG(FIRST_CMD_MSG_TYPE,sizeof(FIRST_CMD_MSG))
 {
 	x = (int) 0;
+
+}
+
+/*
+*	Constructor for G_CODE_MSG
+*	from plc_nml.hh:74
+*/
+G_CODE_MSG::G_CODE_MSG()
+	: RCS_CMD_MSG(G_CODE_MSG_TYPE,sizeof(G_CODE_MSG))
+{
+	gcode_array__length = (int) 0;
+
+}
+
+/*
+*	Constructor for G_ORDER_MSG
+*	from plc_nml.hh:44
+*/
+G_ORDER_MSG::G_ORDER_MSG()
+	: RCS_CMD_MSG(G_ORDER_MSG_TYPE,sizeof(G_ORDER_MSG))
+{
+	show_line_ = (unsigned int) 0;
+	line_no_in_total_file_ = (unsigned int) 0;
+	name_ = (unsigned int) 0;
+	m_type_ = (unsigned int) 0;
+	piercing_hole_ = (unsigned short) 0;
+	x0_ = (double) 0;
+	y0_ = (double) 0;
+	x_ = (double) 0;
+	y_ = (double) 0;
+	i_ = (double) 0;
+	j_ = (double) 0;
+	f_ = (double) 0;
+	r_ = (double) 0;
+	start_angle_ = (float) 0;
+	end_angle_ = (float) 0;
+	length_ = (float) 0;
+	angle_ration = (float) 0;
+	offset_m07_ = (double) 0;
+	offset_m08_ = (double) 0;
 
 }
 
