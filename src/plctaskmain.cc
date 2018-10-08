@@ -2,7 +2,7 @@
 #include "plctask.hh"
 
 int main() {
-  PLCTask plcTask(1);
+  PLCTask plcTask(0.01);
   plcTask.Startup("plctask.nml");
   plcTask.Run();
   std::cout << "Done!" << std::endl;

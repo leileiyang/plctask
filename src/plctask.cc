@@ -2,9 +2,9 @@
 
 #include <nml_oi.hh>
 #include "nml_intf/plc_nml.hh"
+#include <rcs_prnt.hh>
 
 #include <iostream>
-
 
 PLCTask::PLCTask(double sleep_time):
     exec_state_(PLC_TASK_EXEC_DONE),
@@ -20,7 +20,9 @@ PLCTask::PLCTask(double sleep_time):
     plan_error_(0),
     execute_error_(0) {}
 
-PLCTask::~PLCTask() {}
+PLCTask::~PLCTask() {
+  Shutdown();
+}
 
 int PLCTask::Startup(std::string plc_nmlfile) {
   double end;
@@ -48,7 +50,6 @@ int PLCTask::Startup(std::string plc_nmlfile) {
   if (!good) {
     return false;
   }
-  plc_command_ = plc_cmd_buffer_->get_address();
 
   end = RETRY_TIME;
   good = 0;
@@ -93,11 +94,26 @@ int PLCTask::Startup(std::string plc_nmlfile) {
   }
   plc_status_ = new PLC_STAT;
 
+  plc_cmd_buffer_->clear();
+  plc_stat_buffer_->clear();
+  plc_err_buffer_->clear();
+  plc_command_ = plc_cmd_buffer_->get_address();
+
   return true;
 
 }
 
 int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
+  switch (cmd->type) {
+    case FIRST_CMD_MSG_TYPE:
+      rcs_print("Execute FIRST_CMD_MSG_TYPE!\n");
+      break;
+    case SECOND_CMD_MSG_TYPE:
+      rcs_print("Execute SECOND_CMD_MSG_TYPE!\n");
+      break;
+    default:
+      break;
+  }
   return 0;
 }
 
@@ -126,6 +142,11 @@ int PLCTask::Plan() {
       break;
       // immediate command
       // queue command
+    case TEST_CMD_MSG_TYPE:
+    case FIRST_CMD_MSG_TYPE:
+    case SECOND_CMD_MSG_TYPE:
+      TaskQueueCommand(plc_command_);
+      break;
     default:
       break;
   }
@@ -174,6 +195,10 @@ int PLCTask::TaskCheckPreconditions(NMLmsg *cmd) {
     return PLC_TASK_EXEC_DONE;
   }
   switch (cmd->type) {
+    case TEST_CMD_MSG_TYPE:
+    case FIRST_CMD_MSG_TYPE:
+    case SECOND_CMD_MSG_TYPE:
+      return PLC_TASK_EXEC_DONE;
     default:
       return PLC_TASK_EXEC_WAITING_FOR_DEVICES;
   }
@@ -199,7 +224,8 @@ bool PLCTask::Run() {
     end_time = etime();
     /// Job
     // 1 read a command
-    if (0 != plc_cmd_buffer_->peek()) {
+    if (0 < plc_cmd_buffer_->read()) {
+      plc_command_ = plc_cmd_buffer_->get_address();
       plan_error_ = 0;
       execute_error_ = 0;
     }
@@ -216,7 +242,7 @@ bool PLCTask::Run() {
     plc_status_->echo_serial_number = plc_command_->serial_number;
     plc_status_->command_type = plc_command_->type;
     
-    std::cout << end_time - start_time << std::endl; 
+    //std::cout << end_time - start_time << std::endl;
     start_time = end_time;
     timer_.wait();
   }
@@ -238,6 +264,10 @@ void PLCTask::Shutdown() {
   if (NULL != plc_cmd_buffer_) {
     delete plc_cmd_buffer_;
     plc_cmd_buffer_ = NULL;
+  }
+  if (NULL != plc_command_) {
+    delete plc_command_;
+    plc_command_ = NULL;
   }
 }
 
