@@ -8,7 +8,6 @@
 
 PLCTask::PLCTask(double sleep_time):
     exec_state_(PLC_TASK_EXEC_DONE),
-    state_(PLC_STATE_IDLE),
     timer_(sleep_time),
     running_(true),
     plc_cmd_buffer_(NULL),
@@ -18,7 +17,8 @@ PLCTask::PLCTask(double sleep_time):
     plc_status_(NULL),
     plc_task_cmd_(NULL),
     plan_error_(0),
-    execute_error_(0) {}
+    execute_error_(0),
+    task_eager_(0) {}
 
 PLCTask::~PLCTask() {
   Shutdown();
@@ -79,7 +79,7 @@ int PLCTask::Startup(std::string plc_nmlfile) {
       delete plc_err_buffer_;
     }
     plc_err_buffer_ = 
-        new NML(nmlErrorFormat, "plcStatus", "plc", plc_nmlfile.c_str());
+        new NML(nmlErrorFormat, "plcError", "plc", plc_nmlfile.c_str());
 
     if (plc_err_buffer_->valid()) {
       good = 1;
@@ -121,7 +121,7 @@ int PLCTask::TaskQueueCommand(NMLmsg *cmd) {
   if (cmd == 0) {
     return 0;
   }
-  plc_list_.append(cmd);
+  task_list_.append(cmd);
   return 0;
 }
 
@@ -140,32 +140,34 @@ int PLCTask::Plan() {
     // no command
     case 0:
       break;
-      // immediate command
-      // queue command
-    case TEST_CMD_MSG_TYPE:
+    // queue command
     case FIRST_CMD_MSG_TYPE:
     case SECOND_CMD_MSG_TYPE:
-      TaskQueueCommand(plc_command_);
+      retval = TaskQueueCommand(plc_command_);
+      break;
+    // immediate command
+    case MODBUS_READ_MSG_TYPE:
+      retval = TaskIssueCommand(plc_command_);
       break;
     default:
       break;
   }
-  return 0;
+  return retval;
 }
 
 int PLCTask::Execute() {
   int retval = 0;
   switch (exec_state_) {
     case PLC_TASK_EXEC_ERROR:
-      plc_list_.clear();
+      task_list_.clear();
       exec_state_ = PLC_TASK_EXEC_DONE;
       break;
     case PLC_TASK_EXEC_DONE:
       if (0 == plc_task_cmd_) {
-        plc_task_cmd_ = plc_list_.get();
+        plc_task_cmd_ = task_list_.get();
         if (0 != plc_task_cmd_) {
           exec_state_ = (enum PLC_TASK_EXEC_ENUM)
-              TaskCheckPreconditions(plc_task_cmd_);
+             CheckPreconditions(plc_task_cmd_);
 
         }
       } else {
@@ -174,14 +176,13 @@ int PLCTask::Execute() {
           retval = -1;
         } else {
           exec_state_ = (enum PLC_TASK_EXEC_ENUM)
-              TaskCheckPostconditions(plc_task_cmd_);
+              CheckPostconditions(plc_task_cmd_);
 
         }
         plc_task_cmd_ = 0;
       }
       break;
     case PLC_TASK_EXEC_WAITING_FOR_DEVICES:
-
       break;
     default:
       break;
@@ -190,12 +191,11 @@ int PLCTask::Execute() {
 }
 
 
-int PLCTask::TaskCheckPreconditions(NMLmsg *cmd) {
+int PLCTask::CheckPreconditions(NMLmsg *cmd) {
   if (0 == cmd) {
     return PLC_TASK_EXEC_DONE;
   }
   switch (cmd->type) {
-    case TEST_CMD_MSG_TYPE:
     case FIRST_CMD_MSG_TYPE:
     case SECOND_CMD_MSG_TYPE:
       return PLC_TASK_EXEC_DONE;
@@ -205,7 +205,7 @@ int PLCTask::TaskCheckPreconditions(NMLmsg *cmd) {
   return PLC_TASK_EXEC_DONE;
 }
 
-int PLCTask::TaskCheckPostconditions(NMLmsg *cmd) {
+int PLCTask::CheckPostconditions(NMLmsg *cmd) {
   if (0 == cmd) {
     return PLC_TASK_EXEC_DONE;
   }
@@ -224,8 +224,7 @@ bool PLCTask::Run() {
     end_time = etime();
     /// Job
     // 1 read a command
-    if (0 < plc_cmd_buffer_->read()) {
-      plc_command_ = plc_cmd_buffer_->get_address();
+    if (0 != plc_cmd_buffer_->peek()) {
       plan_error_ = 0;
       execute_error_ = 0;
     }
@@ -236,15 +235,20 @@ bool PLCTask::Run() {
       execute_error_ = 0;
     }
 
-    UpdateDevicesStatus();
+    UpdateTaskStatus();
 
     // do top level
     plc_status_->echo_serial_number = plc_command_->serial_number;
     plc_status_->command_type = plc_command_->type;
+    plc_stat_buffer_->write(plc_status_);
     
     //std::cout << end_time - start_time << std::endl;
     start_time = end_time;
-    timer_.wait();
+    if (task_eager_) {
+      task_eager_ = 0;
+    } else {
+      timer_.wait();
+    }
   }
   return true;
 }
@@ -271,6 +275,6 @@ void PLCTask::Shutdown() {
   }
 }
 
-int PLCTask::UpdateDevicesStatus() {
+int PLCTask::UpdateTaskStatus() {
   return 0;
 }

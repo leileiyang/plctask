@@ -5,27 +5,20 @@
 #include <cmd_msg.hh>
 #include "plc.hh"
 
+#define MODBUS_REGISTER_SIZE 30
+
+enum MB_REGISTER_TYPE {
+  MB_REGISTER_BITS,
+  MB_REGISTER_INPUT_BITS,
+  MB_REGISTER_REGISTERS,
+  MB_REGISTER_INPUT_REGISTERS,
+};
+
 class PLC_STAT_MSG: public RCS_STAT_MSG {
  public:
   PLC_STAT_MSG(NMLTYPE t, size_t s): RCS_STAT_MSG(t, s) {};
 
   void update(CMS *cms);
-};
-
-class PLC_STAT: public PLC_STAT_MSG {
- public:
-   PLC_STAT();
-
-   void update(CMS *cms);
-   int x;
-};
-
-class TEST_CMD_MSG: public RCS_CMD_MSG {
- public:
-   TEST_CMD_MSG();
-
-   void update(CMS *cms);
-   int x;
 };
 
 class FIRST_CMD_MSG: public RCS_CMD_MSG {
@@ -42,6 +35,16 @@ class SECOND_CMD_MSG: public RCS_CMD_MSG {
 
    void update(CMS *cms);
    int x;
+};
+
+class MODBUS_READ_MSG: public RCS_CMD_MSG {
+ public:
+  MODBUS_READ_MSG();
+
+  void update(CMS *cms);
+  int type_;
+  int addr_;
+  int nb_;
 };
 
 class G_ORDER_MSG: public RCS_CMD_MSG {
@@ -80,6 +83,27 @@ class G_CODE_MSG: public RCS_CMD_MSG {
   void update(CMS *cms);
 
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(G_ORDER_MSG, gcode_array_, 30);
+};
+
+class MODBUS_REGISTER_STAT: public PLC_STAT_MSG {
+ public:
+  MODBUS_REGISTER_STAT();
+  void update(CMS *cms);
+
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, bits, MODBUS_REGISTER_SIZE);
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, input_bits, MODBUS_REGISTER_SIZE);
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, registers, MODBUS_REGISTER_SIZE);
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, input_registers, MODBUS_REGISTER_SIZE);
+
+};
+
+class PLC_STAT: public PLC_STAT_MSG {
+ public:
+  PLC_STAT();
+
+  void update(CMS *cms);
+  MODBUS_REGISTER_STAT modbus_registers_;
+
 };
 
 int plcFormat(NMLTYPE type, void *buffer, CMS *cms);
