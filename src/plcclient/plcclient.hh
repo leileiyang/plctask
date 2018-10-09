@@ -12,7 +12,6 @@
 
 class PLCClient {
  public:
- public:
   PLCClient(double sleep_time);
   ~PLCClient();
 

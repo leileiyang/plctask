@@ -7,7 +7,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/plcclient")
 message ("sourse dir:" ${PROJECT_SOURCE_DIR})
 
 add_executable (plctask plctask.cc plctaskmain.cc)
-target_link_libraries (plctask plcmsg rcs)
+target_link_libraries (plctask plcmsg rcs modbus)
 
 add_executable (plcsvr plcsvr.cc)
 target_link_libraries (plcsvr plcmsg rcs)

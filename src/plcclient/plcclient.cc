@@ -74,7 +74,7 @@ int PLCClient::Startup(std::string plc_nmlfile) {
       delete plc_err_buffer_;
     }
     plc_err_buffer_ = 
-        new NML(nmlErrorFormat, "plcStatus", "plcClient", plc_nmlfile.c_str());
+        new NML(nmlErrorFormat, "plcError", "plcClient", plc_nmlfile.c_str());
 
     if (plc_err_buffer_->valid()) {
       good = 1;

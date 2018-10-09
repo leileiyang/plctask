@@ -5,6 +5,7 @@
 #include <timer.hh>
 #include <cmd_msg.hh>
 #include <stat_msg.hh>
+#include <modbus/modbus.h>
 
 #include "nml_intf/interpl.hh"
 #include "nml_intf/plc_nml.hh"
@@ -53,6 +54,18 @@ class PLCTask {
   int CheckPreconditions(NMLmsg *cmd);
   int CheckPostconditions(NMLmsg *cmd);
   int UpdateTaskStatus();
+
+ private:
+  modbus_t *modbus_ctx_;
+  int ModbusInit(NMLmsg *cmd);
+  int ModbusRead(NMLmsg *cmd);
+  int ModbusReadBits(int addr, int nb);
+  int ModbusReadInputBits(int addr, int nb);
+  int ModbusReadRegisters(int addr, int nb);
+  int ModbusReadInputRegisters(int addr, int nb);
+  void ModbusRelease();
+
+  char error_[256];
 
 };
 

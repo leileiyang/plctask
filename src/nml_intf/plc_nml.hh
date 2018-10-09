@@ -14,6 +14,12 @@ enum MB_REGISTER_TYPE {
   MB_REGISTER_INPUT_REGISTERS,
 };
 
+enum MB_BACKEND_TYPE {
+  MB_BACKEND_TCP,
+  MB_BACKEND_TCP_PI,
+  MB_BACKEND_RTU,
+};
+
 class PLC_STAT_MSG: public RCS_STAT_MSG {
  public:
   PLC_STAT_MSG(NMLTYPE t, size_t s): RCS_STAT_MSG(t, s) {};
@@ -46,6 +52,21 @@ class MODBUS_READ_MSG: public RCS_CMD_MSG {
   int addr_;
   int nb_;
 };
+
+class MODBUS_INIT_MSG: public RCS_CMD_MSG {
+ public:
+  MODBUS_INIT_MSG();
+
+  void update(CMS *cms);
+  int type_;
+  int ip_port_;
+  int baud_;
+  int slave_id_;
+
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(char, ip_device, 100);
+
+};
+
 
 class G_ORDER_MSG: public RCS_CMD_MSG {
  public:
