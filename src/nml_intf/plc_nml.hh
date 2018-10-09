@@ -63,7 +63,7 @@ class MODBUS_INIT_MSG: public RCS_CMD_MSG {
   int baud_;
   int slave_id_;
 
-  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(char, ip_device, 100);
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(char, ip_device, 100)
 
 };
 
@@ -103,7 +103,7 @@ class G_CODE_MSG: public RCS_CMD_MSG {
   G_CODE_MSG();
   void update(CMS *cms);
 
-  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(G_ORDER_MSG, gcode_array_, 30);
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(G_ORDER_MSG, gcode_array_, 30)
 };
 
 class MODBUS_REGISTER_STAT: public PLC_STAT_MSG {
@@ -111,10 +111,10 @@ class MODBUS_REGISTER_STAT: public PLC_STAT_MSG {
   MODBUS_REGISTER_STAT();
   void update(CMS *cms);
 
-  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, bits, MODBUS_REGISTER_SIZE);
-  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, input_bits, MODBUS_REGISTER_SIZE);
-  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, registers, MODBUS_REGISTER_SIZE);
-  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, input_registers, MODBUS_REGISTER_SIZE);
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, bits, MODBUS_REGISTER_SIZE)
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, input_bits, MODBUS_REGISTER_SIZE)
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, registers, MODBUS_REGISTER_SIZE)
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, input_registers, MODBUS_REGISTER_SIZE)
 
 };
 
