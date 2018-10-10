@@ -106,6 +106,7 @@ int PLCTask::Startup(std::string plc_nmlfile) {
   plc_stat_buffer_->clear();
   plc_err_buffer_->clear();
   plc_command_ = plc_cmd_buffer_->get_address();
+  plc_status_->echo_serial_number = plc_command_->serial_number;
 
   return true;
 }
@@ -145,14 +146,15 @@ bool PLCTask::Run() {
     /// Job
     // 1 read a command
     if (0 != plc_cmd_buffer_->peek()) {
+      // got a new command, clear the errors
       plan_error_ = 0;
       execute_error_ = 0;
     }
     if (0 != Plan()) {
-      plan_error_ = 0;
+      plan_error_ = 1;
     }
     if (0 != Execute()) {
-      execute_error_ = 0;
+      execute_error_ = 1;
     }
 
     UpdateTaskStatus();
@@ -229,6 +231,7 @@ int PLCTask::Plan() {
       retval = TaskQueueCommand(plc_command_);
       break;
     // immediate command
+    case MODBUS_INIT_MSG_TYPE:
     case MODBUS_READ_MSG_TYPE:
       retval = TaskIssueCommand(plc_command_);
       break;
@@ -339,6 +342,7 @@ int PLCTask::ModbusInit(NMLmsg *cmd) {
   if (modbus_ctx_ == NULL) {
     memset(error_, 0, NML_ERROR_LEN);
     sprintf(error_, "Modbus Init Failed!\n");
+    rcs_print("Modbus Init failed!\n");
     return -1;
   } else {
     if (modbus_connect(modbus_ctx_) == -1) {
@@ -349,6 +353,7 @@ int PLCTask::ModbusInit(NMLmsg *cmd) {
       return -2;
     }
   }
+  rcs_print("Modbus Init Success!\n");
   return 0;
 }
 
