@@ -14,7 +14,6 @@ target_link_libraries (plcsvr plcmsg rcs)
 
 add_subdirectory ("${PROJECT_SOURCE_DIR}/nml_intf")
 add_subdirectory ("${PROJECT_SOURCE_DIR}/plcclient")
-add_subdirectory ("${PROJECT_SOURCE_DIR}/gcode")
 
 add_custom_command (
     TARGET plcsvr
