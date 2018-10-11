@@ -63,6 +63,12 @@ class PLCTask {
   int ModbusReadInputBits(int addr, int nb);
   int ModbusReadRegisters(int addr, int nb);
   int ModbusReadInputRegisters(int addr, int nb);
+
+  int ModbusWrite(NMLmsg *cmd);
+  int ModbusWriteBit(int addr, int status);
+  int ModbusWriteBits(int addr, int nb, const unsigned char *src);
+  int ModbusWriteRegister(int addr, int value);
+  int ModbusWriteRegisters(int addr, int nb, const unsigned short *src);
   void ModbusRelease();
 
   char error_[256];

@@ -7,4 +7,5 @@
 #define MODBUS_REGISTER_STAT_TYPE    ((NMLTYPE) 107)
 #define MODBUS_READ_MSG_TYPE         ((NMLTYPE) 108)
 #define MODBUS_INIT_MSG_TYPE         ((NMLTYPE) 109)
+#define MODBUS_WRITE_MSG_TYPE        ((NMLTYPE) 110)
 #endif

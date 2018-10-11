@@ -191,6 +191,13 @@ int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
         retval = -1;
       }
       break;
+    case MODBUS_WRITE_MSG_TYPE:
+      if (ModbusWrite(cmd) >= 0) {
+        retval = 0;
+      } else {
+        retval = -1;
+      }
+      break;
     case MODBUS_INIT_MSG_TYPE:
       if (ModbusInit(cmd) < 0) {
         retval = -1;
@@ -233,6 +240,7 @@ int PLCTask::Plan() {
     // immediate command
     case MODBUS_INIT_MSG_TYPE:
     case MODBUS_READ_MSG_TYPE:
+    case MODBUS_WRITE_MSG_TYPE:
       retval = TaskIssueCommand(plc_command_);
       break;
     default:
@@ -331,7 +339,7 @@ int PLCTask::ModbusInit(NMLmsg *cmd) {
     case MB_BACKEND_TCP_PI:
       break;
     case MB_BACKEND_RTU:
-      modbus_ctx_ = modbus_new_rtu(ip_device, msg->baud_, 'N', 8, 1);
+      modbus_ctx_ = modbus_new_rtu(ip_device, msg->baud_, msg->parity_, 8, 1);
       if (modbus_ctx_) {
         modbus_set_slave(modbus_ctx_, msg->slave_id_);
       }
@@ -379,94 +387,165 @@ int PLCTask::ModbusRead(NMLmsg *cmd) {
   return rc;
 }
 
+#define ERROR_REPORT \
+  rcs_print("%s failed: %s\n", func_name, modbus_strerror(errno)); \
+  memset(error_, 0, NML_ERROR_LEN); \
+  sprintf(error_, "%s failed!\n", func_name)
+
+#define MODBUS_READ(modbus_read_func, reply_registers) \
+  int try_count = 3; \
+  int rc = 0; \
+  do { \
+    int rc = modbus_read_func(modbus_ctx_, addr, nb, reply_registers); \
+    if (rc < 0) { \
+      try_count--; \
+    } else { \
+      reply_nb = rc; \
+      break; \
+    } \
+  } while (try_count > 0); \
+  if (try_count == 0) { \
+    ERROR_REPORT; \
+  } \
+  return rc; \
+
 int PLCTask::ModbusReadBits(int addr, int nb) {
+  static const char *func_name = "modbus_read_bits";
   uint8_t *tab_rp_bits = (uint8_t *)(plc_status_->modbus_registers_.bits);
-  int try_count = 3;
-  int rc = 0;
-  do {
-    int rc = modbus_read_bits(modbus_ctx_, addr, nb, tab_rp_bits);
-    if (rc < 0) { // read error;
-      try_count--; 
-    } else {
-      plc_status_->modbus_registers_.bits_length = rc;
-      break;
-    }
-  } while (try_count > 0);
-  if (try_count == 0) {
-    // connect error
-    rcs_print("modbus_read_bits failed!\n");
-    memset(error_, 0, NML_ERROR_LEN);
-    sprintf(error_, "modbus_read_bits failed!\n");
-  }
-  return rc;
+  int &reply_nb = plc_status_->modbus_registers_.bits_length;
+
+  MODBUS_READ(modbus_read_bits, tab_rp_bits)
 }
 
 int PLCTask::ModbusReadInputBits(int addr, int nb) {
+  static const char *func_name = "modbus_read_input_bits"; 
   uint8_t *tab_rp_bits = (uint8_t *)(plc_status_->modbus_registers_.input_bits);
-  int try_count = 3;
-  int rc = 0;
-  do {
-    rc = modbus_read_input_bits(modbus_ctx_, addr, nb, tab_rp_bits);
-    if (rc < 0) { // read error;
-      try_count--; 
-    } else {
-      plc_status_->modbus_registers_.input_bits_length = rc;
-      break;
-    }
-  } while (try_count > 0);
-  if (try_count == 0) {
-    // connect error
-    rcs_print("modbus_read_input_bits failed!\n");
-    memset(error_, 0, NML_ERROR_LEN);
-    sprintf(error_, "modbus_read_input_bits failed!\n");
-  }  
-  return rc;
+  int &reply_nb = plc_status_->modbus_registers_.input_bits_length;
+
+  MODBUS_READ(modbus_read_input_bits, tab_rp_bits)
 }
 
 int PLCTask::ModbusReadRegisters(int addr, int nb) {
+  static const char *func_name = "modbus_read_registers";
   uint16_t *tab_rp_registers = \
       (uint16_t *)(plc_status_->modbus_registers_.registers);
 
+  int &reply_nb = plc_status_->modbus_registers_.registers_length;
+
+  MODBUS_READ(modbus_read_registers, tab_rp_registers)
+}
+
+int PLCTask::ModbusReadInputRegisters(int addr, int nb) {
+  static const char *func_name = "modbus_read_input_registers";
+  uint16_t *tab_rp_registers = \
+      (uint16_t *)(plc_status_->modbus_registers_.input_registers);
+
+  int &reply_nb = plc_status_->modbus_registers_.input_registers_length;
+
+  MODBUS_READ(modbus_read_input_registers, tab_rp_registers)
+}
+
+int PLCTask::ModbusWrite(NMLmsg *cmd) {
+  MODBUS_WRITE_MSG *write_msg = (MODBUS_WRITE_MSG *)cmd;
   int rc = 0;
-  int try_count = 3;
-  do {
-    rc = modbus_read_registers(modbus_ctx_, addr, nb, tab_rp_registers);
-    if (rc < 0) { // read error;
-      try_count--; 
-    } else {
-      plc_status_->modbus_registers_.registers_length = rc;
+  switch (write_msg->type_) {
+    case MB_REGISTER_BITS:
+      if (write_msg->nb_ == 1) {
+        rc = ModbusWriteBit(write_msg->addr_,
+            write_msg->bits[0]);
+
+      } else {
+        rc = ModbusWriteBits(write_msg->addr_, write_msg->nb_,
+            write_msg->bits);
+      }
       break;
-    }
-  } while (try_count > 0);
-  if (try_count == 0) {
-    // connect error
-    rcs_print("modbus_read_registers failed!\n");
-    memset(error_, 0, NML_ERROR_LEN);
-    sprintf(error_, "modbus_read_registers failed!\n");
+    case MB_REGISTER_REGISTERS:
+      if (write_msg->nb_ == 1) {
+        rc = ModbusWriteRegister(write_msg->addr_,
+            write_msg->registers[0]);
+
+      } else {
+        rc = ModbusWriteRegisters(write_msg->addr_, write_msg->nb_,
+            write_msg->registers);
+
+      }
+      break;
+    default:
+      break;
   }
   return rc;
 }
 
-int PLCTask::ModbusReadInputRegisters(int addr, int nb) {
-  uint16_t *tab_rp_registers = \
-      (uint16_t *)(plc_status_->modbus_registers_.input_registers);
-
+int PLCTask::ModbusWriteBit(int addr, int status) {
+  static const char *func_name = "modbus_write_bit";
   int try_count = 3;
   int rc = 0;
   do {
-    rc = modbus_read_input_registers(modbus_ctx_, addr, nb, tab_rp_registers);
-    if (rc < 0) { // read error;
-      try_count--; 
+    int rc = modbus_write_bit(modbus_ctx_, addr, status);
+    if (rc < 0) {
+      try_count--;
     } else {
-      plc_status_->modbus_registers_.input_registers_length = rc;
       break;
     }
   } while (try_count > 0);
   if (try_count == 0) {
-    // connect error
-    rcs_print("modbus_read_input_registers failed!\n");
-    memset(error_, 0, NML_ERROR_LEN);
-    sprintf(error_, "modbus_read_input_registers failed!\n");
+    ERROR_REPORT;
+  }
+  return rc;
+}
+
+int PLCTask::ModbusWriteBits(int addr, int nb, const unsigned char *src) {
+  static const char *func_name = "modbus_write_bits";
+  uint8_t *tab_value = (uint8_t *)src;
+  int try_count = 3;
+  int rc = 0;
+  do {
+    int rc = modbus_write_bits(modbus_ctx_, addr, nb, tab_value);
+    if (rc < 0) {
+      try_count--;
+    } else {
+      break;
+    }
+  } while (try_count > 0);
+  if (try_count == 0) {
+    ERROR_REPORT;
+  }
+  return rc;
+}
+
+int PLCTask::ModbusWriteRegister(int addr, int value) {
+  static const char *func_name = "modbus_write_register";
+  int try_count = 3;
+  int rc = 0;
+  do {
+    int rc = modbus_write_register(modbus_ctx_, addr, value);
+    if (rc < 0) {
+      try_count--;
+    } else {
+      break;
+    }
+  } while (try_count > 0);
+  if (try_count == 0) {
+    ERROR_REPORT;
+  }
+  return rc;
+}
+
+int PLCTask::ModbusWriteRegisters(int addr, int nb, const unsigned short *src) {
+  static const char *func_name = "modbus_write_registers";
+  uint16_t *tab_value = (uint16_t *)src;
+  int try_count = 3;
+  int rc = 0;
+  do {
+    int rc = modbus_write_registers(modbus_ctx_, addr, nb, tab_value);
+    if (rc < 0) {
+      try_count--;
+    } else {
+      break;
+    }
+  } while (try_count > 0);
+  if (try_count == 0) {
+    ERROR_REPORT;
   }
   return rc;
 }

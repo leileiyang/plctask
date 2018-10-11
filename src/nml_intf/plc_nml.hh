@@ -62,6 +62,7 @@ class MODBUS_INIT_MSG: public RCS_CMD_MSG {
   int ip_port_;
   int baud_;
   int slave_id_;
+  char parity_;
 
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(char, ip_device, 100)
 
@@ -76,6 +77,20 @@ class MODBUS_REGISTER_STAT: public PLC_STAT_MSG {
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, input_bits, MODBUS_REGISTER_SIZE)
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, registers, MODBUS_REGISTER_SIZE)
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, input_registers, MODBUS_REGISTER_SIZE)
+
+};
+
+class MODBUS_WRITE_MSG: public RCS_CMD_MSG {
+ public:
+  MODBUS_WRITE_MSG();
+
+  void update(CMS *cms);
+  int type_;
+  int addr_;
+  int nb_;
+
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, bits, MODBUS_REGISTER_SIZE)
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, registers, MODBUS_REGISTER_SIZE)
 
 };
 
