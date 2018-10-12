@@ -1,7 +1,10 @@
 #ifndef PLC_NML_HH_
 #define PLC_NML_HH_
 
+#ifndef WIN32
 #include <cms.hh>
+#endif
+
 #include <stat_msg.hh>
 #include <cmd_msg.hh>
 #include "plc.hh"

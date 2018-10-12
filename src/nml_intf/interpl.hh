@@ -60,8 +60,11 @@ class NML_INTERP_LIST {
     int len();
 
   private:
+#ifdef WIN32
+    class RCS_LINKED_LIST * linked_list_ptr;
+#else
     class LinkedList * linked_list_ptr;
-    //class RCS_LINKED_LIST * linked_list_ptr;
+#endif
     NML_INTERP_LIST_NODE temp_node;	// filled in and put on the list
     int next_line_number;	// line number used to fill temp_node
     int line_number;		// line number of node from get()
