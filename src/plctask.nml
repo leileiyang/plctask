@@ -3,11 +3,11 @@
 
 # Buffers:
 #       name 	   type  	      host 	size 	neut 	0 	buf# 	max_proc 	. . .
-B plcCommand 	SHMEM    	 localhost 	4160 	0 	* 	1 	* 	1100 	TCP=5005  xdr
+B plcCommand 	SHMEM    	 localhost 	4160 	0 	* 	21 	* 	1100 	TCP=5007  xdr
  
-B  plcStatus 	SHMEM    	 localhost 	4160 	0 	* 	2 	* 	1101 	TCP=5005  xdr
+B  plcStatus 	SHMEM    	 localhost 	4160 	0 	* 	22 	* 	1101 	TCP=5007  xdr
  
-B   plcError 	SHMEM    	 localhost 	4224 	0 	* 	3 	* 	1102 	TCP=5005  xdr  queue
+B   plcError 	SHMEM    	 localhost 	4224 	0 	* 	23 	* 	1102 	TCP=5007  xdr  queue
  
 
 # Processes: 

@@ -19,17 +19,17 @@
 #include <string.h>		/* memcpy() */
 
 #include <rcs.hh>		// LinkedList
-#include <interpl.hh>		// these decls
 #include <linklist.hh>
 #include <nmlmsg.hh>            /* class NMLmsg */
-#include <rcs_prnt.hh>
+#include <rcs_print.hh>
+#include "interpl.hh"	// these decls
 
 //NML_INTERP_LIST interp_list;	/* NML Union, for interpreter */
 
 NML_INTERP_LIST::NML_INTERP_LIST()
 {
-  //linked_list_ptr = new LinkedList;
-  linked_list_ptr = new RCS_LINKED_LIST;
+  linked_list_ptr = new LinkedList;
+  //linked_list_ptr = new RCS_LINKED_LIST;
 
   next_line_number = 0;
   line_number = 0;

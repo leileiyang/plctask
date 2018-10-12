@@ -6,7 +6,7 @@
 
 #include <nml_oi.hh>
 #include "nml_intf/plc_nml.hh"
-#include <rcs_prnt.hh>
+#include <rcs_print.hh>
 
 #include <iostream>
 
