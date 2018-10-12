@@ -411,16 +411,16 @@ int PLCTask::ModbusRead(NMLmsg *cmd) {
 
 int PLCTask::ModbusReadBits(int addr, int nb) {
   static const char *func_name = "modbus_read_bits";
-  uint8_t *tab_rp_bits = (uint8_t *)(plc_status_->modbus_registers_.bits);
-  int &reply_nb = plc_status_->modbus_registers_.bits_length;
+  uint8_t *tab_rp_bits = (uint8_t *)(plc_status_->modbus_bits);
+  int &reply_nb = plc_status_->modbus_bits_length;
 
   MODBUS_READ(modbus_read_bits, tab_rp_bits)
 }
 
 int PLCTask::ModbusReadInputBits(int addr, int nb) {
   static const char *func_name = "modbus_read_input_bits"; 
-  uint8_t *tab_rp_bits = (uint8_t *)(plc_status_->modbus_registers_.input_bits);
-  int &reply_nb = plc_status_->modbus_registers_.input_bits_length;
+  uint8_t *tab_rp_bits = (uint8_t *)(plc_status_->modbus_input_bits);
+  int &reply_nb = plc_status_->modbus_input_bits_length;
 
   MODBUS_READ(modbus_read_input_bits, tab_rp_bits)
 }
@@ -428,9 +428,9 @@ int PLCTask::ModbusReadInputBits(int addr, int nb) {
 int PLCTask::ModbusReadRegisters(int addr, int nb) {
   static const char *func_name = "modbus_read_registers";
   uint16_t *tab_rp_registers = \
-      (uint16_t *)(plc_status_->modbus_registers_.registers);
+      (uint16_t *)(plc_status_->modbus_registers);
 
-  int &reply_nb = plc_status_->modbus_registers_.registers_length;
+  int &reply_nb = plc_status_->modbus_registers_length;
 
   MODBUS_READ(modbus_read_registers, tab_rp_registers)
 }
@@ -438,9 +438,9 @@ int PLCTask::ModbusReadRegisters(int addr, int nb) {
 int PLCTask::ModbusReadInputRegisters(int addr, int nb) {
   static const char *func_name = "modbus_read_input_registers";
   uint16_t *tab_rp_registers = \
-      (uint16_t *)(plc_status_->modbus_registers_.input_registers);
+      (uint16_t *)(plc_status_->modbus_input_registers);
 
-  int &reply_nb = plc_status_->modbus_registers_.input_registers_length;
+  int &reply_nb = plc_status_->modbus_input_registers_length;
 
   MODBUS_READ(modbus_read_input_registers, tab_rp_registers)
 }

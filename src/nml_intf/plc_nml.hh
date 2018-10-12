@@ -69,18 +69,6 @@ class MODBUS_INIT_MSG: public RCS_CMD_MSG {
 
 };
 
-class MODBUS_REGISTER_STAT: public PLC_STAT_MSG {
- public:
-  MODBUS_REGISTER_STAT();
-  void update(CMS *cms);
-
-  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, bits, MODBUS_REGISTER_SIZE)
-  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, input_bits, MODBUS_REGISTER_SIZE)
-  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, registers, MODBUS_REGISTER_SIZE)
-  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, input_registers, MODBUS_REGISTER_SIZE)
-
-};
-
 class MODBUS_WRITE_MSG: public RCS_CMD_MSG {
  public:
   MODBUS_WRITE_MSG();
@@ -100,8 +88,11 @@ class PLC_STAT: public PLC_STAT_MSG {
   PLC_STAT();
 
   void update(CMS *cms);
-  MODBUS_REGISTER_STAT modbus_registers_;
 
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, modbus_bits, MODBUS_REGISTER_SIZE)
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, modbus_input_bits, MODBUS_REGISTER_SIZE)
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, modbus_registers, MODBUS_REGISTER_SIZE)
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, modbus_input_registers, MODBUS_REGISTER_SIZE)
 };
 
 int plcFormat(NMLTYPE type, void *buffer, CMS *cms);
