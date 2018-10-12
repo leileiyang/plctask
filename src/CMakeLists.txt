@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 2.6)
 project (plctask)
 include_directories ("${PROJECT_SOURCE_DIR}")
 include_directories ("${PROJECT_SOURCE_DIR}/nml_intf")
-include_directories ("${PROJECT_SOURCE_DIR}/plcclient")
 include_directories ("/home/debian/cnc/include/linuxcnc")
 link_directories ("/home/debian/cnc/lib")
 
@@ -15,7 +14,6 @@ add_executable (plcsvr plcsvr.cc)
 target_link_libraries (plcsvr plcmsg nml)
 
 add_subdirectory ("${PROJECT_SOURCE_DIR}/nml_intf")
-add_subdirectory ("${PROJECT_SOURCE_DIR}/plcclient")
 
 add_custom_command (
     TARGET plcsvr
