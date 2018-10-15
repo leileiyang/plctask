@@ -9,7 +9,7 @@
 #include <cmd_msg.hh>
 #include "plc.hh"
 
-#define MODBUS_REGISTER_SIZE 30
+#define MODBUS_REGISTER_SIZE 50
 
 enum MB_REGISTER_TYPE {
   MB_REGISTER_BITS,
