@@ -5,8 +5,8 @@
 #include <timer.hh>
 #include <cmd_msg.hh>
 #include <stat_msg.hh>
-#include <modbus/modbus.h>
 
+#include "dev/modbus/modbus_manager.hh"
 #include "nml_intf/interpl.hh"
 #include "nml_intf/plc_nml.hh"
 
@@ -56,20 +56,22 @@ class PLCTask {
   int UpdateTaskStatus();
 
  private:
-  modbus_t *modbus_ctx_;
+  ModbusManager modbus_manager_;
   int ModbusInit(NMLmsg *cmd);
   int ModbusRead(NMLmsg *cmd);
-  int ModbusReadBits(int addr, int nb);
-  int ModbusReadInputBits(int addr, int nb);
-  int ModbusReadRegisters(int addr, int nb);
-  int ModbusReadInputRegisters(int addr, int nb);
+  int ModbusReadBits(int slave_id, int addr, int nb);
+  int ModbusReadInputBits(int slave_id, int addr, int nb);
+  int ModbusReadRegisters(int slave_id, int addr, int nb);
+  int ModbusReadInputRegisters(int slave_id, int addr, int nb);
 
   int ModbusWrite(NMLmsg *cmd);
-  int ModbusWriteBit(int addr, int status);
-  int ModbusWriteBits(int addr, int nb, const unsigned char *src);
-  int ModbusWriteRegister(int addr, int value);
-  int ModbusWriteRegisters(int addr, int nb, const unsigned short *src);
-  void ModbusRelease();
+  int ModbusWriteBit(int slave_id, int addr, int status);
+  int ModbusWriteBits(int slave_id, int addr, int nb,
+      const unsigned char *src);
+
+  int ModbusWriteRegister(int slave_id, int addr, int value);
+  int ModbusWriteRegisters(int slave_id, int addr, int nb,
+      const unsigned short *src);
 
   char error_[256];
 

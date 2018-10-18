@@ -28,8 +28,11 @@
 
 NML_INTERP_LIST::NML_INTERP_LIST()
 {
+#ifndef WIN32
   linked_list_ptr = new LinkedList;
-  //linked_list_ptr = new RCS_LINKED_LIST;
+#else
+  linked_list_ptr = new RCS_LINKED_LIST;
+#endif
 
   next_line_number = 0;
   line_number = 0;

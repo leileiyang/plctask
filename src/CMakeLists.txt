@@ -2,12 +2,17 @@ cmake_minimum_required (VERSION 2.6)
 project (plctask)
 include_directories ("${PROJECT_SOURCE_DIR}")
 include_directories ("${PROJECT_SOURCE_DIR}/nml_intf")
+include_directories ("${PROJECT_SOURCE_DIR}/dev/modbus")
 include_directories ("/home/debian/cnc/include/linuxcnc")
 link_directories ("/home/debian/cnc/lib")
 
 message ("sourse dir:" ${PROJECT_SOURCE_DIR})
 
-add_executable (plctask plctask.cc plctaskmain.cc)
+file (GLOB DEV_MODBUS_SOURCES
+  "${PROJECT_SOURCE_DIR}/dev/modbus/*.h"
+  "${PROJECT_SOURCE_DIR}/dev/modbus/*.cc")
+
+add_executable (plctask plctask.cc plctaskmain.cc ${DEV_MODBUS_SOURCES})
 target_link_libraries (plctask plcmsg nml modbus)
 
 add_executable (plcsvr plcsvr.cc)

@@ -47,7 +47,14 @@ class SECOND_CMD_MSG: public RCS_CMD_MSG {
    int x;
 };
 
-class MODBUS_READ_MSG: public RCS_CMD_MSG {
+class MODBUS_CMD_MSG: public RCS_CMD_MSG {
+ public:
+   MODBUS_CMD_MSG(NMLTYPE t, size_t s): RCS_CMD_MSG(t, s) {}
+   void update(CMS *cms);
+   int slave_id_;
+};
+
+class MODBUS_READ_MSG: public MODBUS_CMD_MSG {
  public:
   MODBUS_READ_MSG();
 
@@ -57,7 +64,7 @@ class MODBUS_READ_MSG: public RCS_CMD_MSG {
   int nb_;
 };
 
-class MODBUS_INIT_MSG: public RCS_CMD_MSG {
+class MODBUS_INIT_MSG: public MODBUS_CMD_MSG {
  public:
   MODBUS_INIT_MSG();
 
@@ -72,7 +79,7 @@ class MODBUS_INIT_MSG: public RCS_CMD_MSG {
 
 };
 
-class MODBUS_WRITE_MSG: public RCS_CMD_MSG {
+class MODBUS_WRITE_MSG: public MODBUS_CMD_MSG {
  public:
   MODBUS_WRITE_MSG();
 
