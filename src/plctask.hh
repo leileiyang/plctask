@@ -56,22 +56,33 @@ class PLCTask {
   int UpdateTaskStatus();
 
  private:
-  ModbusManager modbus_manager_;
+  ModbusManager thc_master_;
+  ModbusManager *GetModbusMaster(int master_id);
+
   int ModbusInit(NMLmsg *cmd);
   int ModbusRead(NMLmsg *cmd);
-  int ModbusReadBits(int slave_id, int addr, int nb);
-  int ModbusReadInputBits(int slave_id, int addr, int nb);
-  int ModbusReadRegisters(int slave_id, int addr, int nb);
-  int ModbusReadInputRegisters(int slave_id, int addr, int nb);
+  int ModbusReadBits(ModbusManager *manager, int slave_id, int addr, int nb);
+  int ModbusReadInputBits(ModbusManager *manager, int slave_id,
+      int addr, int nb);
+
+  int ModbusReadRegisters(ModbusManager *manager, int slave_id,
+      int addr, int nb);
+
+  int ModbusReadInputRegisters(ModbusManager *manager, int slave_id,
+      int addr, int nb);
 
   int ModbusWrite(NMLmsg *cmd);
-  int ModbusWriteBit(int slave_id, int addr, int status);
-  int ModbusWriteBits(int slave_id, int addr, int nb,
-      const unsigned char *src);
+  int ModbusWriteBit(ModbusManager *manager, int slave_id,
+      int addr, int status);
 
-  int ModbusWriteRegister(int slave_id, int addr, int value);
-  int ModbusWriteRegisters(int slave_id, int addr, int nb,
-      const unsigned short *src);
+  int ModbusWriteBits(ModbusManager *manager, int slave_id,
+      int addr, int nb, const unsigned char *src);
+
+  int ModbusWriteRegister(ModbusManager *manager, int slave_id,
+      int addr, int value);
+
+  int ModbusWriteRegisters(ModbusManager *manager, int slave_id,
+      int addr, int nb, const unsigned short *src);
 
   char error_[256];
 

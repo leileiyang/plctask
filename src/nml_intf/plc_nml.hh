@@ -49,8 +49,11 @@ class SECOND_CMD_MSG: public RCS_CMD_MSG {
 
 class MODBUS_CMD_MSG: public RCS_CMD_MSG {
  public:
-   MODBUS_CMD_MSG(NMLTYPE t, size_t s): RCS_CMD_MSG(t, s) {}
+   MODBUS_CMD_MSG(NMLTYPE t, size_t s): RCS_CMD_MSG(t, s),
+       master_id_(0),slave_id_(0) {}
+
    void update(CMS *cms);
+   int master_id_;
    int slave_id_;
 };
 
