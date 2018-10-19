@@ -8,4 +8,7 @@
 #define MODBUS_READ_MSG_TYPE         ((NMLTYPE) 108)
 #define MODBUS_INIT_MSG_TYPE         ((NMLTYPE) 109)
 #define MODBUS_WRITE_MSG_TYPE        ((NMLTYPE) 110)
+
+#define JOB_CMD_MSG_TYPE             ((NMLTYPE) 200)
+#define JOB_MODBUS_WRITE_MSG_TYPE    ((NMLTYPE) 201)
 #endif

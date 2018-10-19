@@ -6,6 +6,7 @@
 #include <cmd_msg.hh>
 #include <stat_msg.hh>
 
+#include "job/jobmanager.hh"
 #include "dev/modbus/modbus_manager.hh"
 #include "nml_intf/interpl.hh"
 #include "nml_intf/plc_nml.hh"
@@ -58,6 +59,7 @@ class PLCTask {
  private:
   ModbusManager thc_master_;
   ModbusManager *GetModbusMaster(int master_id);
+  JobManager job_manager_;
 
   int ModbusInit(NMLmsg *cmd);
   int ModbusRead(NMLmsg *cmd);

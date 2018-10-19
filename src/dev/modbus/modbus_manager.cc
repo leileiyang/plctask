@@ -11,7 +11,9 @@ ModbusManager::~ModbusManager() {
 void ModbusManager::Register(int slave_id, ModbusStation *station) {
   std::map<int, ModbusStation *>::iterator it = stations_.find(slave_id);
   if (it != stations_.end()) {
-    delete it->second;
+    if (it->second) {
+      delete it->second;
+    }
     stations_.erase(it);
   }
   stations_[slave_id] = station;

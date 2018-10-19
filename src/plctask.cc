@@ -211,10 +211,16 @@ int PLCTask::TaskQueueCommand(NMLmsg *cmd) {
   if (cmd == 0) {
     return 0;
   }
-  task_list_.append(cmd);
+  switch (cmd->type) {
+    case JOB_MODBUS_WRITE_MSG_TYPE:
+      job_manager_.AppendCommand(cmd);
+      break;
+    default:
+      task_list_.append(cmd);
+      break;
+  }
   return 0;
 }
-
 
 int PLCTask::Plan() {
   NMLTYPE type;
@@ -233,6 +239,7 @@ int PLCTask::Plan() {
     // queue command
     case FIRST_CMD_MSG_TYPE:
     case SECOND_CMD_MSG_TYPE:
+    case JOB_MODBUS_WRITE_MSG_TYPE:
       retval = TaskQueueCommand(plc_command_);
       break;
     // immediate command
