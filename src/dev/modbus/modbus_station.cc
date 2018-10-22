@@ -58,7 +58,7 @@ void ModbusStation::ReleaseModbus() {
   int try_count = 3; \
   int rc = 0; \
   do { \
-    int rc = modbus_func(modbus_ctx_, addr, nb, table); \
+    rc = modbus_func(modbus_ctx_, addr, nb, table); \
     if (rc < 0) { \
       try_count--; \
     } else { \
