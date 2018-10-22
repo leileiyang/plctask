@@ -84,6 +84,7 @@ class PLCTask {
   int ModbusWriteRegisters(ModbusManager *manager, int slave_id,
       int addr, int nb, const unsigned short *src);
 
+  int JobAbort();
   char error_[256];
 
 };

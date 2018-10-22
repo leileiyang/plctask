@@ -34,38 +34,38 @@ class PLC_STAT_MSG: public RCS_STAT_MSG {
 
 class FIRST_CMD_MSG: public RCS_CMD_MSG {
  public:
-   FIRST_CMD_MSG();
+  FIRST_CMD_MSG();
 
-   void update(CMS *cms);
-   int x;
+  void update(CMS *cms);
+  int x;
 };
 
 class SECOND_CMD_MSG: public RCS_CMD_MSG {
  public:
-   SECOND_CMD_MSG();
+  SECOND_CMD_MSG();
 
-   void update(CMS *cms);
-   int x;
+  void update(CMS *cms);
+  int x;
 };
 
 class MODBUS_CMD_MSG: public RCS_CMD_MSG {
  public:
-   MODBUS_CMD_MSG(NMLTYPE t, size_t s): RCS_CMD_MSG(t, s),
-       master_id_(0),slave_id_(0) {}
+  MODBUS_CMD_MSG(NMLTYPE t, size_t s): RCS_CMD_MSG(t, s),
+      master_id_(0),slave_id_(0) {}
 
-   void update(CMS *cms);
-   int master_id_;
-   int slave_id_;
+  void update(CMS *cms);
+  int master_id_;
+  int slave_id_;
 };
 
 class JOB_CMD_MSG: public RCS_CMD_MSG {
  public:
-   JOB_CMD_MSG(NMLTYPE t, size_t s): RCS_CMD_MSG(t, s),
-       id_(0),job_id_(0) {}
+  JOB_CMD_MSG(NMLTYPE t, size_t s): RCS_CMD_MSG(t, s),
+      id_(0),job_id_(0) {}
 
-   void update(CMS *cms);
-   int id_;
-   int job_id_;
+  void update(CMS *cms);
+  int id_;
+  int job_id_;
 };
 
 class MODBUS_READ_MSG: public MODBUS_CMD_MSG {
@@ -135,6 +135,12 @@ class JOB_MODBUS_WRITE_MSG: public JOB_CMD_MSG {
 
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, bits, MODBUS_REGISTER_SIZE)
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, registers, MODBUS_REGISTER_SIZE)
+};
+
+class JOB_ABORT_MSG: public RCS_CMD_MSG {
+ public:
+  JOB_ABORT_MSG();
+  void update(CMS *cms);
 };
 
 int plcFormat(NMLTYPE type, void *buffer, CMS *cms);

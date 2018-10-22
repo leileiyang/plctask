@@ -182,6 +182,15 @@ bool PLCTask::Run() {
   return true;
 }
 
+int PLCTask::JobAbort() {
+  task_list_.clear();
+  plan_error_ = 0;
+  execute_error_  = 0;
+  exec_state_ == PLC_TASK_EXEC_DONE;
+  plc_task_cmd_ = 0;
+  return 0;
+}
+
 int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
   int retval = 0;
   switch (cmd->type) {
@@ -190,6 +199,9 @@ int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
       break;
     case SECOND_CMD_MSG_TYPE:
       rcs_print("Execute SECOND_CMD_MSG_TYPE!\n");
+      break;
+    case JOB_ABORT_MSG_TYPE:
+      retval = JobAbort();
       break;
     case MODBUS_READ_MSG_TYPE:
       if (ModbusRead(cmd) >= 0) {
@@ -223,6 +235,7 @@ int PLCTask::TaskQueueCommand(NMLmsg *cmd) {
   switch (cmd->type) {
     case JOB_MODBUS_WRITE_MSG_TYPE:
       job_manager_.AppendCommand(cmd);
+      task_eager_ = 1;
       break;
     default:
       task_list_.append(cmd);
@@ -252,6 +265,7 @@ int PLCTask::Plan() {
       retval = TaskQueueCommand(plc_command_);
       break;
     // immediate command
+    case JOB_ABORT_MSG_TYPE:
     case MODBUS_INIT_MSG_TYPE:
     case MODBUS_READ_MSG_TYPE:
     case MODBUS_WRITE_MSG_TYPE:
@@ -274,6 +288,7 @@ int PLCTask::Execute() {
       if (0 == plc_task_cmd_) {
         plc_task_cmd_ = task_list_.get();
         if (0 != plc_task_cmd_) {
+          task_eager_ = 1;
           exec_state_ = (enum PLC_TASK_EXEC_ENUM)
              CheckPreconditions(plc_task_cmd_);
 
@@ -286,6 +301,7 @@ int PLCTask::Execute() {
           exec_state_ = (enum PLC_TASK_EXEC_ENUM)
               CheckPostconditions(plc_task_cmd_);
 
+          task_eager_ = 1;
         }
         plc_task_cmd_ = 0;
       }

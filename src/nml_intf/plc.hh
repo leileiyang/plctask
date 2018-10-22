@@ -11,4 +11,5 @@
 
 #define JOB_CMD_MSG_TYPE             ((NMLTYPE) 200)
 #define JOB_MODBUS_WRITE_MSG_TYPE    ((NMLTYPE) 201)
+#define JOB_ABORT_MSG_TYPE           ((NMLTYPE) 202)
 #endif
