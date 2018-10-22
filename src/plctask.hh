@@ -3,8 +3,6 @@
 
 #include <string>
 #include <timer.hh>
-#include <cmd_msg.hh>
-#include <stat_msg.hh>
 
 #include "job/jobmanager.hh"
 #include "dev/modbus/modbus_manager.hh"

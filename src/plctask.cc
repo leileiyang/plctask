@@ -158,6 +158,15 @@ bool PLCTask::Run() {
     UpdateTaskStatus();
 
     // do top level
+    if (plan_error_ || execute_error_ || exec_state_ == PLC_TASK_EXEC_ERROR) {
+      plc_status_->status_ = RCS_ERROR;
+    } else if (!plan_error_ && !execute_error_ && 
+        exec_state_ == PLC_TASK_EXEC_DONE || task_list_.len() == 0 &&
+        plc_task_cmd_ == 0) {
+
+      plc_status_->status_ = RCS_DONE;
+    }
+
     plc_status_->echo_serial_number = plc_command_->serial_number;
     plc_status_->command_type = plc_command_->type;
     plc_stat_buffer_->write(plc_status_);

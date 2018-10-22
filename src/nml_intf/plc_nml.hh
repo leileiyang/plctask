@@ -7,6 +7,7 @@
 
 #include <stat_msg.hh>
 #include <cmd_msg.hh>
+#include <rcs.hh>
 #include "plc.hh"
 
 #define MODBUS_REGISTER_SIZE 50
@@ -111,6 +112,8 @@ class PLC_STAT: public PLC_STAT_MSG {
   PLC_STAT();
 
   void update(CMS *cms);
+
+  int status_;
 
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, modbus_bits, MODBUS_REGISTER_SIZE)
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, modbus_input_bits, MODBUS_REGISTER_SIZE)
