@@ -22,27 +22,7 @@ void PlcJob::ArrangeJob(NML_INTERP_LIST &task_list) {
 }
 
 int PlcJob::AppendCommand(NMLmsg *nml_msg) {
-  switch (nml_msg->type) {
-    case JOB_MODBUS_WRITE_MSG_TYPE: {
-      JOB_MODBUS_WRITE_MSG *cmd = (JOB_MODBUS_WRITE_MSG *)nml_msg;
-      MODBUS_WRITE_MSG msg;
-      msg.master_id_ = cmd->master_id_;
-      msg.slave_id_ = cmd->slave_id_;
-      msg.type_ = cmd->type_;
-      msg.addr_ = cmd->addr_;
-      msg.nb_ = cmd->nb_;
-      msg.bits_length = cmd->bits_length;
-      msg.registers_length = cmd->registers_length;
-      memmove(msg.bits, cmd->bits, sizeof(unsigned char) * cmd->bits_length);
-      memmove(msg.registers, cmd->registers,
-          sizeof(unsigned short) * cmd->registers_length);
-
-      command_list_.append(msg);
-                                    }
-      break;
-    default:
-      break;
-  }
+  command_list_.append(nml_msg);
   return 0;
 }
 

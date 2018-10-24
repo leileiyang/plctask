@@ -193,6 +193,18 @@ int PLCTask::JobAbort() {
 
 int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
   int retval = 0;
+  JOB_CMD_MSG *job_cmd = static_cast<JOB_CMD_MSG *>(cmd);
+  if (job_cmd) {
+    if (job_cmd->job_id_ >= 0) { // a queue job plc command
+      job_manager_.AppendCommand(cmd);
+      task_eager_ = 1;
+      return 0;
+    } else { // a alone job plc command, execute immediately
+      ;
+    }
+  } else { // not a job command, execute immediately
+    ;
+  }
   switch (cmd->type) {
     case FIRST_CMD_MSG_TYPE:
       rcs_print("Execute FIRST_CMD_MSG_TYPE!\n");
@@ -232,15 +244,7 @@ int PLCTask::TaskQueueCommand(NMLmsg *cmd) {
   if (cmd == 0) {
     return 0;
   }
-  switch (cmd->type) {
-    case JOB_MODBUS_WRITE_MSG_TYPE:
-      job_manager_.AppendCommand(cmd);
-      task_eager_ = 1;
-      break;
-    default:
-      task_list_.append(cmd);
-      break;
-  }
+  task_list_.append(cmd);
   return 0;
 }
 
@@ -261,7 +265,6 @@ int PLCTask::Plan() {
     // queue command
     case FIRST_CMD_MSG_TYPE:
     case SECOND_CMD_MSG_TYPE:
-    case JOB_MODBUS_WRITE_MSG_TYPE:
       retval = TaskQueueCommand(plc_command_);
       break;
     // immediate command

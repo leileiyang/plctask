@@ -12,6 +12,7 @@ int JobManager::AppendCommand(NMLmsg *msg) {
   JOB_CMD_MSG *cmd = (JOB_CMD_MSG *)msg;
   int cmd_id = cmd->id_;
   int job_id = cmd->job_id_;
+  cmd->job_id_ = -1; // erase the job id
   
   std::map<int, PlcJob *>::iterator it = jobs_.find(job_id);
   if (it != jobs_.end()) { // find the job
