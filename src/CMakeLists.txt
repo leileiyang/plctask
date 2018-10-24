@@ -7,6 +7,12 @@ include_directories ("${PROJECT_SOURCE_DIR}")
 
 message ("sourse dir:" ${PROJECT_SOURCE_DIR})
 
+if (CMAKE_COMPILER_IS_GNUCC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+elseif (MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+endif()
+
 file (GLOB DEV_MODBUS_SOURCES
   "${PROJECT_SOURCE_DIR}/dev/modbus/*.h"
   "${PROJECT_SOURCE_DIR}/dev/modbus/*.cc")

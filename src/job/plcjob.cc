@@ -6,14 +6,14 @@ void PlcJob::ArrangeJob(NML_INTERP_LIST &task_list) {
   NMLmsg *msg = NULL;
   if (command_list_.len()) {
     while (command_list_.len()) {
-      NMLmsg *msg = command_list_.get();
+      msg = command_list_.get();
       task_list.append(msg);
       shadow_list_.append(msg);
     }
     command_list_.clear();
   } else {
     while (shadow_list_.len()) {
-      NMLmsg *msg = command_list_.get();
+      msg = command_list_.get();
       task_list.append(msg);
       command_list_.append(msg);
     }
@@ -43,6 +43,7 @@ int PlcJob::AppendCommand(NMLmsg *nml_msg) {
     default:
       break;
   }
+  return 0;
 }
 
 void PlcJob::Clear() {

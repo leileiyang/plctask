@@ -161,7 +161,7 @@ bool PLCTask::Run() {
     if (plan_error_ || execute_error_ || exec_state_ == PLC_TASK_EXEC_ERROR) {
       plc_status_->status_ = RCS_ERROR;
     } else if (!plan_error_ && !execute_error_ && 
-        exec_state_ == PLC_TASK_EXEC_DONE || task_list_.len() == 0 &&
+        exec_state_ == PLC_TASK_EXEC_DONE && task_list_.len() == 0 &&
         plc_task_cmd_ == 0) {
 
       plc_status_->status_ = RCS_DONE;
@@ -186,7 +186,7 @@ int PLCTask::JobAbort() {
   task_list_.clear();
   plan_error_ = 0;
   execute_error_  = 0;
-  exec_state_ == PLC_TASK_EXEC_DONE;
+  exec_state_ = PLC_TASK_EXEC_DONE;
   plc_task_cmd_ = 0;
   return 0;
 }
@@ -311,7 +311,7 @@ int PLCTask::Execute() {
     default:
       break;
   }
-  return 0;
+  return retval;
 }
 
 int PLCTask::CheckPreconditions(NMLmsg *cmd) {

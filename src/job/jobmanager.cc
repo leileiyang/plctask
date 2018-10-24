@@ -31,6 +31,7 @@ int JobManager::AppendCommand(NMLmsg *msg) {
     new_job->AppendCommand(msg);
     jobs_[job_id] = new_job;
   }
+  return 0;
 }
 
 PlcJob* JobManager::GetPlcJob(int job_id) {
