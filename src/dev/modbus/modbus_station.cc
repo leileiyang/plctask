@@ -2,7 +2,7 @@
 
 #include <errno.h>
 #include <string.h>
-#include <rcs_print.hh>
+#include <rcs_prnt.hh>
 
 #include "nml_intf/plc_nml.hh"
 

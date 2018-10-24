@@ -1,5 +1,5 @@
 #include <timer.hh>
-#include <rcs_print.hh>
+#include <rcs_prnt.hh>
 #include <nml_srv.hh>
 #include <cmd_msg.hh>
 #include <nml_oi.hh>
