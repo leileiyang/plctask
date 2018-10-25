@@ -1,5 +1,5 @@
-#ifndef PLC_NML_HH_
-#define PLC_NML_HH_
+#ifndef NML_INTF_PLC_NML_HH_
+#define NML_INTF_PLC_NML_HH_
 
 #ifndef WIN32
 #include <cms.hh>
@@ -8,7 +8,7 @@
 #include <stat_msg.hh>
 #include <cmd_msg.hh>
 #include <rcs.hh>
-#include "plc.hh"
+#include "plc.h"
 
 #define MODBUS_REGISTER_SIZE 50
 
@@ -51,10 +51,10 @@ class SECOND_CMD_MSG: public RCS_CMD_MSG {
 class JOB_CMD_MSG: public RCS_CMD_MSG {
  public:
   JOB_CMD_MSG(NMLTYPE t, size_t s): RCS_CMD_MSG(t, s),
-      id_(0),job_id_(-1) {}
+      cmd_id_(0),job_id_(-1) {}
 
   void update(CMS *cms);
-  int id_;
+  int cmd_id_;
   int job_id_;
 };
 
@@ -121,10 +121,34 @@ class PLC_STAT: public PLC_STAT_MSG {
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, modbus_input_registers, MODBUS_REGISTER_SIZE)
 };
 
-class JOB_ABORT_MSG: public RCS_CMD_MSG {
+class JOB_ABORT_MSG: public JOB_CMD_MSG {
  public:
   JOB_ABORT_MSG();
   void update(CMS *cms);
+};
+
+class OPEN_GAS_CMD: public JOB_CMD_MSG {
+ public:
+  OPEN_GAS_CMD();
+  void update(CMS *cms);
+
+  int gas_id_;
+};
+
+class OPEN_CUTTING_GAS: public JOB_CMD_MSG {
+ public:
+  OPEN_CUTTING_GAS();
+  void update(CMS *cms);
+
+  int level_;
+};
+
+class SET_CUTTING_PRESSURE: public JOB_CMD_MSG {
+ public:
+  SET_CUTTING_PRESSURE();
+  void update(CMS *cms);
+
+  int level_;
 };
 
 int plcFormat(NMLTYPE type, void *buffer, CMS *cms);

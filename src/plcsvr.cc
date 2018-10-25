@@ -6,7 +6,7 @@
 #include <stat_msg.hh>
 #include <math.h>
 
-#include "nml_intf/plc_nml.hh"
+#include "nml_intf/plc_nml.h"
 
 static RCS_CMD_CHANNEL *plcCommandChannel = NULL;
 static RCS_STAT_CHANNEL *plcStatusChannel = NULL;

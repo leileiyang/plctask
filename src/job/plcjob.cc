@@ -1,4 +1,4 @@
-#include "job/plcjob.hh"
+#include "job/plcjob.h"
 
 #include <string.h>
 

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "plctask.hh"
+#include "plctask.h"
 
 int main() {
   PLCTask plcTask(0.01);

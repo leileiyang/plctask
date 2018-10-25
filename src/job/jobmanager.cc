@@ -1,4 +1,4 @@
-#include "job/jobmanager.hh"
+#include "job/jobmanager.h"
 
 JobManager::~JobManager() {
   std::map<int, PlcJob *>::iterator it = jobs_.begin();
@@ -10,7 +10,7 @@ JobManager::~JobManager() {
 
 int JobManager::AppendCommand(NMLmsg *msg) {
   JOB_CMD_MSG *cmd = (JOB_CMD_MSG *)msg;
-  int cmd_id = cmd->id_;
+  int cmd_id = cmd->cmd_id_;
   int job_id = cmd->job_id_;
   cmd->job_id_ = -1; // erase the job id
   

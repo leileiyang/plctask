@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "dev/modbus/modbus_station.hh"
+#include "dev/modbus/modbus_station.h"
 
 class ModbusManager {
  public:

@@ -1,10 +1,10 @@
-#include "plctask.hh"
+#include "plctask.h"
 
 #include <stdio.h>
 #include <string.h>
 
 #include <nml_oi.hh>
-#include "nml_intf/plc_nml.hh"
+#include "nml_intf/plc_nml.h"
 #include <rcs_prnt.hh>
 
 #include <iostream>
@@ -194,15 +194,11 @@ int PLCTask::JobAbort() {
 int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
   int retval = 0;
   JOB_CMD_MSG *job_cmd = static_cast<JOB_CMD_MSG *>(cmd);
-  if (job_cmd) {
-    if (job_cmd->job_id_ >= 0) { // a queue job plc command
-      job_manager_.AppendCommand(cmd);
-      task_eager_ = 1;
-      return 0;
-    } else { // a alone job plc command, execute immediately
-      ;
-    }
-  } else { // not a job command, execute immediately
+  if (job_cmd->job_id_ >= 0) { // a queue job plc command
+    job_manager_.AppendCommand(cmd);
+    task_eager_ = 1;
+    return 0;
+  } else { // a alone job plc command, execute immediately
     ;
   }
   switch (cmd->type) {
@@ -233,6 +229,15 @@ int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
       if (ModbusInit(cmd) < 0) {
         retval = -1;
       }
+      break;
+    case OPEN_GAS_CMD_TYPE:
+      retval = OpenGas(((OPEN_GAS_CMD *)cmd)->gas_id_);
+      break;
+    case OPEN_CUTTING_GAS_TYPE:
+      retval = OpenCuttingGas(((OPEN_CUTTING_GAS *)cmd)->level_);
+      break;
+    case SET_CUTTING_PRESSURE_TYPE:
+      retval = SetCuttingPressure(((SET_CUTTING_PRESSURE *)cmd)->level_);
       break;
     default:
       break;
@@ -574,4 +579,16 @@ int PLCTask::ModbusWrite(NMLmsg *cmd) {
       break;
   }
   return rc;
+}
+
+int PLCTask::OpenGas(int gas_id) {
+  return 0;
+}
+
+int PLCTask::OpenCuttingGas(int level) {
+  return 0;
+}
+
+int PLCTask::SetCuttingPressure(int level) {
+  return 0;
 }

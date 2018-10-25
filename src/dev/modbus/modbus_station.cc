@@ -1,10 +1,10 @@
-#include "dev/modbus/modbus_station.hh"
+#include "dev/modbus/modbus_station.h"
 
 #include <errno.h>
 #include <string.h>
 #include <rcs_prnt.hh>
 
-#include "nml_intf/plc_nml.hh"
+#include "nml_intf/plc_nml.h"
 
 ModbusStation::~ModbusStation() {
   ReleaseModbus();

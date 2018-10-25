@@ -1,4 +1,4 @@
-#include "dev/modbus/modbus_manager.hh"
+#include "dev/modbus/modbus_manager.h"
 
 ModbusManager::~ModbusManager() {
   std::map<int, ModbusStation *>::iterator it = stations_.begin();

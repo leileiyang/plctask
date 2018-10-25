@@ -1,8 +1,8 @@
 #ifndef JOB_PLCJOB_H_
 #define JOB_PLCJOB_H_
 
-#include "nml_intf/plc_nml.hh"
-#include "nml_intf/interpl.hh"
+#include "nml_intf/plc_nml.h"
+#include "nml_intf/interpl.h"
 
 class PlcJob {
  public:

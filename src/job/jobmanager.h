@@ -3,8 +3,8 @@
 
 #include <map>
 
-#include "job/plcjob.hh"
-#include "nml_intf/plc_nml.hh"
+#include "job/plcjob.h"
+#include "nml_intf/plc_nml.h"
 
 class JobManager {
  public:

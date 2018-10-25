@@ -1,13 +1,13 @@
-#ifndef PLCTASK_HH_
-#define PLCTASK_HH_
+#ifndef PLCTASK_H_
+#define PLCTASK_H_
 
 #include <string>
 #include <timer.hh>
 
-#include "job/jobmanager.hh"
-#include "dev/modbus/modbus_manager.hh"
-#include "nml_intf/interpl.hh"
-#include "nml_intf/plc_nml.hh"
+#include "job/jobmanager.h"
+#include "dev/modbus/modbus_manager.h"
+#include "nml_intf/interpl.h"
+#include "nml_intf/plc_nml.h"
 
 enum PLC_TASK_EXEC_ENUM {
   PLC_TASK_EXEC_ERROR = 1,
@@ -86,6 +86,10 @@ class PLCTask {
 
   int JobAbort();
   char error_[256];
+
+  int OpenGas(int gas_id);
+  int OpenCuttingGas(int level);
+  int SetCuttingPressure(int level);
 
 };
 
