@@ -16,4 +16,6 @@
 #define OPEN_CUTTING_GAS_TYPE            ((NMLTYPE) 221)
 #define SET_CUTTING_PRESSURE_TYPE        ((NMLTYPE) 222)
 
+#define IO_CFG_MSG_TYPE                  ((NMLTYPE) 250)
+
 #endif

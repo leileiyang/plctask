@@ -16,11 +16,10 @@ bool IOGas::SetPressure(int gas_id, double pressure) {
   return true;
 }
 
-/*
-void IOGas::Update(PLC_STATUS status, int gas_id, int &on) {
-  status = PLC_DONE;
-  // if the gas id does not map to any io port,
-  // you will get the port 0 state
-  on = io_dev_->GetPortState(gas_id);
+bool IOGas::Update(std::map<int, GasItem> &gas_items) {
+  std::map<int, GasItem>::iterator it = gas_items.begin();
+  for (; it != gas_items.end(); it++) {
+    it->second.state = io_dev_->GetPortState(it->first);
+  }
+  return true;
 }
-*/

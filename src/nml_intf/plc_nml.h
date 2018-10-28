@@ -11,6 +11,7 @@
 #include "plc.h"
 
 #define MODBUS_REGISTER_SIZE 50
+#define IO_PORT_SIZE 32 
 
 enum MB_REGISTER_TYPE {
   MB_REGISTER_BITS,
@@ -149,6 +150,17 @@ class SET_CUTTING_PRESSURE: public JOB_CMD_MSG {
   void update(CMS *cms);
 
   int level_;
+};
+
+class IO_CFG_MSG: public JOB_CMD_MSG {
+ public:
+  IO_CFG_MSG();
+  void update(CMS *cms);
+
+  int dev_id_;
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(short, port_no, IO_PORT_SIZE)
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(short, func_id, IO_PORT_SIZE)
+
 };
 
 int plcFormat(NMLTYPE type, void *buffer, CMS *cms);

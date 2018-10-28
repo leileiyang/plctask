@@ -77,5 +77,5 @@ int Gas::SetPressure(int gas_id, double pressure) {
 }
 
 void Gas::Update() {
-  //gas_intf_->Update(status_, working_gas_, on_);
+  gas_intf_->Update(gas_items);
 }

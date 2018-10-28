@@ -11,6 +11,7 @@ class IOGas: public GasInterface {
   virtual bool Open(int gas_id);
   virtual bool Close(int gas_id);
   virtual bool SetPressure(int gas_id, double pressure);
+  virtual bool Update(std::map<int, GasItem> &gas_items);
 
  private:
   IoDevice *io_dev_;

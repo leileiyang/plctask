@@ -1,7 +1,6 @@
 #ifndef DEV_GAS_GAS_H_
 #define DEV_GAS_GAS_H_
 
-#include <map>
 #include <string>
 
 #include "gas_interface.h"
@@ -13,13 +12,6 @@ enum GAS_ID {
   GAS_HIGH_AIR,
   GAS_HIGH_O2,
   GAS_HIGH_N2,
-};
-
-struct GasItem {
-  int id;
-  std::string name;
-  double pressure;
-  int state;
 };
 
 class Gas {
