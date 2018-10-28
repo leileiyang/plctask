@@ -1,7 +1,38 @@
 #include "gas.h"
-#include "io_gas.h"
+#include "gas_interface.h"
 
-Gas::Gas(): gas_intf_(NULL), working_gas_(0), on_(0) {}
+#ifdef NML_OLC_COMPAT
+#include <rcs_print.hh>
+#else
+#include <rcs_prnt.hh>
+#endif
+
+typedef std::pair<int, std::string> pair_t;
+
+std::map<int, GasItem> Gas::gas_items = Gas::CreateGasItems();
+
+static const pair_t gas_pairs[] = {
+  pair_t(GAS_AIR, "Air"),
+  pair_t(GAS_O2, "Oxygen"),
+  pair_t(GAS_N2, "Nitrogen"),
+  pair_t(GAS_HIGH_AIR, "HighAir"),
+  pair_t(GAS_HIGH_O2, "HighOxygen"),
+  pair_t(GAS_HIGH_N2, "HighNitrogen"),
+};
+
+std::map<int, GasItem> Gas::CreateGasItems() {
+  std::map<int, GasItem> items;
+  int size = sizeof(gas_pairs) / sizeof(gas_pairs[0]);
+  GasItem item = {0, "Gas", 10, 0}; 
+  for (int i = 0; i < size; i++) {
+    item.id = gas_pairs[i].first;
+    item.name = gas_pairs[i].second;
+    items[item.id] = item;
+  }
+  return items;
+}
+
+Gas::Gas(): gas_intf_(NULL), working_gas_(0) {}
 
 Gas::~Gas() {}
 
@@ -16,6 +47,8 @@ int Gas::ConnectInterface(GasInterface *gas_intf) {
 
 int Gas::Open(int gas_id) {
   if (gas_intf_->Open(gas_id)) {
+    rcs_print("Gas Open %s\n", gas_items[gas_id].name.c_str());
+    gas_items[gas_id].state = 1;
     working_gas_ = gas_id;
     return 0; 
   } else {
@@ -25,7 +58,8 @@ int Gas::Open(int gas_id) {
 
 int Gas::Close(int gas_id) {
   if (gas_intf_->Close(gas_id)) {
-    //working_gas_ = PLC_CMD_NONE;
+    rcs_print("Gas Cloase %s\n", gas_items[gas_id].name.c_str());
+    gas_items[gas_id].state = 0;
     return 0; 
   } else {
     return -1;
@@ -34,6 +68,8 @@ int Gas::Close(int gas_id) {
 
 int Gas::SetPressure(int gas_id, double pressure) {
   if (gas_intf_->SetPressure(gas_id, pressure)) {
+    gas_items[gas_id].pressure = pressure;
+    rcs_print("Set %s Pressure %f\n", gas_items[gas_id].name.c_str(), pressure);
     return 0; 
   } else {
     return -1;
@@ -42,8 +78,4 @@ int Gas::SetPressure(int gas_id, double pressure) {
 
 void Gas::Update() {
   //gas_intf_->Update(status_, working_gas_, on_);
-}
-
-void Gas::Close() {
-  gas_intf_->Close();
 }

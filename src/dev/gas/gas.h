@@ -1,7 +1,26 @@
 #ifndef DEV_GAS_GAS_H_
 #define DEV_GAS_GAS_H_
 
+#include <map>
+#include <string>
+
 #include "gas_interface.h"
+
+enum GAS_ID {
+  GAS_AIR,
+  GAS_O2,
+  GAS_N2,
+  GAS_HIGH_AIR,
+  GAS_HIGH_O2,
+  GAS_HIGH_N2,
+};
+
+struct GasItem {
+  int id;
+  std::string name;
+  double pressure;
+  int state;
+};
 
 class Gas {
  public:
@@ -16,16 +35,12 @@ class Gas {
   int ConnectInterface(GasInterface *gas_intf);
   void Update();
 
-  virtual void Close();
+  static std::map<int, GasItem> gas_items;
+  static std::map<int, GasItem> CreateGasItems();
 
  private:
-  // static configure
   GasInterface *gas_intf_;
-
-  // state information
   int working_gas_;
-  // 0->off; 1->on
-  int on_;
 
 };
 

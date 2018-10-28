@@ -1,5 +1,11 @@
 #include "io_device.h"
 
+#ifdef NML_OLC_COMPAT
+#include <rcs_print.hh>
+#else
+#include <rcs_prnt.hh>
+#endif
+
 #include <cassert>
 
 int IoDevice::GetPortNoByFuncId(int func_id) {
@@ -18,6 +24,7 @@ int IoDevice::Open(int port, int mode) {
   } else {
     ports_.set(GetPortNoByFuncId(port), 1);
   }
+  rcs_print("IoDevice Open Port %d\n", port);
   return 0;
 }
 
@@ -28,6 +35,7 @@ int IoDevice::Close(int port, int mode) {
   } else {
     ports_.set(GetPortNoByFuncId(port), 0);
   }
+  rcs_print("IoDevice Close Port %d\n", port);
   return 0;
 }
 

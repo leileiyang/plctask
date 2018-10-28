@@ -1,8 +1,6 @@
 #ifndef DEV_GAS_IOGAS_H_
 #define DEV_GAS_IOGAS_H_
 
-#include <map>
-#include <string>
 #include "gas_interface.h"
 
 class IoDevice;
@@ -13,7 +11,6 @@ class IOGas: public GasInterface {
   virtual bool Open(int gas_id);
   virtual bool Close(int gas_id);
   virtual bool SetPressure(int gas_id, double pressure);
-  virtual void Close();
 
  private:
   IoDevice *io_dev_;

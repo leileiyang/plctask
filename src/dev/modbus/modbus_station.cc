@@ -41,6 +41,7 @@ int ModbusStation::InitModbus(int type, const char *ip_device, int ip_port,
       memset(error_, 0, ERROR_MSG_LEN);
       sprintf(error_, "Connection failed: %s\n", modbus_strerror(errno));
       modbus_free(modbus_ctx_);
+      modbus_ctx_ = NULL;
       return -2;
     }
   }
