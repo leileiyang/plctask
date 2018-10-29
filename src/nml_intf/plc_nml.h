@@ -12,6 +12,7 @@
 
 #define MODBUS_REGISTER_SIZE 50
 #define IO_PORT_SIZE 32 
+#define JOB_SIZE 100 
 
 enum MB_REGISTER_TYPE {
   MB_REGISTER_BITS,
@@ -128,9 +129,9 @@ class JOB_ABORT_MSG: public JOB_CMD_MSG {
   void update(CMS *cms);
 };
 
-class OPEN_GAS_CMD: public JOB_CMD_MSG {
+class OPEN_GAS: public JOB_CMD_MSG {
  public:
-  OPEN_GAS_CMD();
+  OPEN_GAS();
   void update(CMS *cms);
 
   int gas_id_;
@@ -152,6 +153,90 @@ class SET_CUTTING_PRESSURE: public JOB_CMD_MSG {
   int level_;
 };
 
+class LHC_FOLLOW: public JOB_CMD_MSG {
+ public:
+  LHC_FOLLOW();
+  void update(CMS *cms);
+
+  int level_;
+};
+
+class LHC_PROGRESSIVE_FOLLOW: public JOB_CMD_MSG {
+ public:
+  LHC_PROGRESSIVE_FOLLOW();
+  void update(CMS *cms);
+
+  int level_;
+};
+
+class LHC_LIFT_CMD: public JOB_CMD_MSG {
+ public:
+  LHC_LIFT_CMD();
+  void update(CMS *cms);
+};
+
+class LHC_Z_AXIS_HOLD_CMD: public JOB_CMD_MSG {
+ public:
+  LHC_Z_AXIS_HOLD_CMD();
+  void update(CMS *cms);
+};
+
+class LASER_ON_CMD: public JOB_CMD_MSG {
+ public:
+  LASER_ON_CMD();
+  void update(CMS *cms);
+};
+
+class LASER_OFF_CMD: public JOB_CMD_MSG {
+ public:
+  LASER_OFF_CMD();
+  void update(CMS *cms);
+};
+
+class LASER_SHUTTER_ON_CMD: public JOB_CMD_MSG {
+ public:
+  LASER_SHUTTER_ON_CMD();
+  void update(CMS *cms);
+};
+
+class LASER_SHUTTER_OFF_CMD: public JOB_CMD_MSG {
+ public:
+  LASER_SHUTTER_OFF_CMD();
+  void update(CMS *cms);
+};
+
+class LASER_POWER: public JOB_CMD_MSG {
+ public:
+  LASER_POWER();
+  void update(CMS *cms);
+
+  int level_;
+};
+
+class LASER_DUTYRATIO: public JOB_CMD_MSG {
+ public:
+  LASER_DUTYRATIO();
+  void update(CMS *cms);
+
+  int level_;
+};
+
+class LASER_PULSE_FREQUENCY: public JOB_CMD_MSG {
+ public:
+  LASER_PULSE_FREQUENCY();
+  void update(CMS *cms);
+
+  int level_;
+};
+
+class LASER_TYPE: public JOB_CMD_MSG {
+ public:
+  LASER_TYPE();
+  void update(CMS *cms);
+
+  int level_;
+};
+
 class IO_CFG_MSG: public JOB_CMD_MSG {
  public:
   IO_CFG_MSG();
@@ -160,7 +245,39 @@ class IO_CFG_MSG: public JOB_CMD_MSG {
   int dev_id_;
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(short, port_no, IO_PORT_SIZE)
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(short, func_id, IO_PORT_SIZE)
+};
 
+class DELAY_BLOW: public JOB_CMD_MSG {
+ public:
+  DELAY_BLOW();
+  void update(CMS *cms);
+
+  int level_;
+};
+
+class DELAY_STAY: public JOB_CMD_MSG {
+ public:
+  DELAY_STAY();
+  void update(CMS *cms);
+
+  int level_;
+};
+
+class FOCUS_POSITION: public JOB_CMD_MSG {
+ public:
+  FOCUS_POSITION();
+  void update(CMS *cms);
+
+  int level_;
+};
+
+class PLC_JOB_MSG: public JOB_CMD_MSG {
+ public:
+  PLC_JOB_MSG();
+  void update(CMS *cms);
+  int plc_job_id_;
+
+  DECLARE_NML_DYNAMIC_LENGTH_ARRAY(short, plc_cmds, JOB_SIZE)
 };
 
 int plcFormat(NMLTYPE type, void *buffer, CMS *cms);

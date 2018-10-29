@@ -8,6 +8,7 @@ class PlcJob {
  public:
   void ArrangeJob(NML_INTERP_LIST &task_list);
   int AppendCommand(NMLmsg *nml_msg);
+  int AppendCommand(short plc_cmd_id);
   void Clear();
 
  private:

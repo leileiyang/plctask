@@ -2,6 +2,7 @@
 #define DEV_GAS_GASINTERFACE_H_
 
 #include <map>
+#include <string>
 
 struct GasItem {
   int id;

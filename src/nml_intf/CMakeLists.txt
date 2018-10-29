@@ -6,7 +6,7 @@ add_custom_command (
   COMMAND java
     ARGS -jar ${PROJECT_SOURCE_DIR}/nml_intf/CodeGenCmdLine.jar update_with_name=true
     ${PROJECT_SOURCE_DIR}/nml_intf/plc_nml.h -o ${PROJECT_SOURCE_DIR}/nml_intf/plc_nml.cc
-  DEPENDS plc_nml.h
+  DEPENDS plc.h plc_nml.h
   VERBATIM
   )
 

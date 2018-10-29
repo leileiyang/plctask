@@ -38,3 +38,21 @@ int JobManager::AppendCommand(NMLmsg *msg) {
 PlcJob* JobManager::GetPlcJob(int job_id) {
   return jobs_[job_id];
 }
+
+int JobManager::ParsePlcJob(NMLmsg *msg) {
+  PLC_JOB_MSG *job = (PLC_JOB_MSG *)msg;
+  std::map<int, PlcJob *>::iterator it = jobs_.find(job->plc_job_id_);
+  if (it != jobs_.end()) { // find the job
+    if (it->second) {
+      delete it->second;
+    }
+    jobs_.erase(it);
+  }
+
+  PlcJob *new_job = new PlcJob;
+  for (int i = 0; i < job->plc_cmds_length; i++) {
+    new_job->AppendCommand(job->plc_cmds[i]);
+  }
+  jobs_[job->plc_job_id_] = new_job;
+  return 0;
+}

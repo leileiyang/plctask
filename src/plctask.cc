@@ -230,8 +230,8 @@ int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
         retval = -1;
       }
       break;
-    case OPEN_GAS_CMD_TYPE:
-      retval = OpenGas(((OPEN_GAS_CMD *)cmd)->gas_id_);
+    case OPEN_GAS_TYPE:
+      retval = OpenGas(((OPEN_GAS *)cmd)->gas_id_);
       break;
     case OPEN_CUTTING_GAS_TYPE:
       retval = OpenCuttingGas(((OPEN_CUTTING_GAS *)cmd)->level_);

@@ -4,12 +4,12 @@
 #include <map>
 
 #include "job/plcjob.h"
-#include "nml_intf/plc_nml.h"
 
 class JobManager {
  public:
   ~JobManager();
   int AppendCommand(NMLmsg *msg);
+  int ParsePlcJob(NMLmsg *msg);
   PlcJob* GetPlcJob(int job_id);
  private:
   std::map<int, PlcJob *> jobs_;
