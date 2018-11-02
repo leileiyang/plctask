@@ -53,6 +53,7 @@ void ModbusStation::ReleaseModbus() {
     modbus_close(modbus_ctx_);
     modbus_free(modbus_ctx_);
   }
+  modbus_ctx_ = NULL;
 }
 
 #define MODBUS_READ_WRITE(modbus_func) \

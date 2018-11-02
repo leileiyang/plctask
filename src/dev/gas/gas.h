@@ -14,6 +14,8 @@ enum GAS_ID {
   GAS_HIGH_N2,
 };
 
+class IoDevice;
+
 class Gas {
  public:
   Gas();
@@ -25,6 +27,7 @@ class Gas {
   // Before using the gas device, you must connect a
   // gas interface class instances first.
   int ConnectInterface(GasInterface *gas_intf);
+  int ConnectIoDevice(IoDevice* io_dev);
   void Update();
 
   static std::map<int, GasItem> gas_items;

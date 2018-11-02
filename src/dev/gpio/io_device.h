@@ -4,7 +4,7 @@
 #include <bitset>
 #include <map>
 
-#define IO_PORT_SIZE 16
+#define MAX_IO_PORT_SIZE 16
 
 enum IO_OP_MODE {
   IO_OP_PORT_NO,
@@ -26,7 +26,7 @@ class IoDevice {
   int GetPortState(int port, int mode = IO_OP_FUNC_ID);
 
   // static resources
-  std::bitset<IO_PORT_SIZE> ports_;
+  std::bitset<MAX_IO_PORT_SIZE> ports_;
   IoCfg io_cfg_;
 
  private:

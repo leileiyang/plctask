@@ -23,6 +23,14 @@ class ModbusStation {
   int WriteBits(int addr, int nb, const uint8_t *table);
   int WriteRegister(int addr, int value);
   int WriteRegisters(int addr, int nb, const uint16_t *table);
+  int SetSlaveId(int slave_id) {
+    slave_id_ = slave_id;
+    modbus_flush(modbus_ctx_);
+    return modbus_set_slave(modbus_ctx_, slave_id);
+  }
+  int SlaveId() const {
+    return slave_id_;
+  }
 
   void GetErrMsg(char *error) {
     sprintf(error, "%s", error_); 

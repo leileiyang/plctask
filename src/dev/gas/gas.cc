@@ -1,5 +1,6 @@
 #include "gas.h"
 #include "gas_interface.h"
+#include "io_gas.h"
 
 #ifdef NML_OLC_COMPAT
 #include <rcs_print.hh>
@@ -32,9 +33,11 @@ std::map<int, GasItem> Gas::CreateGasItems() {
   return items;
 }
 
-Gas::Gas(): gas_intf_(NULL), working_gas_(0) {}
+Gas::Gas(): gas_intf_(NULL), working_gas_(-1) {}
 
-Gas::~Gas() {}
+Gas::~Gas() {
+  delete gas_intf_;
+}
 
 int Gas::ConnectInterface(GasInterface *gas_intf) {
   if (gas_intf) {
@@ -43,6 +46,11 @@ int Gas::ConnectInterface(GasInterface *gas_intf) {
   } else {
     return -1;
   }
+}
+
+int Gas::ConnectIoDevice(IoDevice* io_dev) {
+  gas_intf_ = new IOGas(io_dev);
+  return 0;
 }
 
 int Gas::Open(int gas_id) {

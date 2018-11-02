@@ -6,6 +6,8 @@
 
 #include "job/jobmanager.h"
 #include "dev/modbus/modbus_manager.h"
+#include "dev/gas/gas.h"
+#include "dev/gpio/io_device.h"
 #include "nml_intf/interpl.h"
 #include "nml_intf/plc_nml.h"
 
@@ -15,8 +17,6 @@ enum PLC_TASK_EXEC_ENUM {
   PLC_TASK_EXEC_WAITING_FOR_DEVICES = 3,
 
 };
-
-
 
 class PLCTask {
  public:
@@ -55,38 +55,30 @@ class PLCTask {
   int UpdateTaskStatus();
 
  private:
-  ModbusManager thc_master_;
-  ModbusManager *GetModbusMaster(int master_id);
+  ModbusManager modbus_manager_;
   JobManager job_manager_;
 
   int ModbusInit(NMLmsg *cmd);
   int ModbusRead(NMLmsg *cmd);
-  int ModbusReadBits(ModbusManager *manager, int slave_id, int addr, int nb);
-  int ModbusReadInputBits(ModbusManager *manager, int slave_id,
-      int addr, int nb);
-
-  int ModbusReadRegisters(ModbusManager *manager, int slave_id,
-      int addr, int nb);
-
-  int ModbusReadInputRegisters(ModbusManager *manager, int slave_id,
-      int addr, int nb);
+  int ModbusReadBits(int master_id, int slave_id, int addr, int nb);
+  int ModbusReadInputBits(int master_id, int slave_id, int addr, int nb);
+  int ModbusReadRegisters(int master_id, int slave_id, int addr, int nb);
+  int ModbusReadInputRegisters(int master_id, int slave_id, int addr, int nb);
 
   int ModbusWrite(NMLmsg *cmd);
-  int ModbusWriteBit(ModbusManager *manager, int slave_id,
-      int addr, int status);
+  int ModbusWriteBit(int master_id, int slave_id, int addr, int status);
+  int ModbusWriteBits(int master_id, int slave_id, int addr, int nb,
+      const unsigned char *src);
 
-  int ModbusWriteBits(ModbusManager *manager, int slave_id,
-      int addr, int nb, const unsigned char *src);
-
-  int ModbusWriteRegister(ModbusManager *manager, int slave_id,
-      int addr, int value);
-
-  int ModbusWriteRegisters(ModbusManager *manager, int slave_id,
-      int addr, int nb, const unsigned short *src);
+  int ModbusWriteRegister(int master_id, int slave_id, int addr, int value);
+  int ModbusWriteRegisters(int master_id, int slave_id, int addr, int nb,
+      const unsigned short *src);
 
   int JobAbort();
   char error_[256];
 
+  IoDevice out_dev_;
+  Gas gas_;
   int OpenGas(int gas_id);
   int OpenCuttingGas(int level);
   int SetCuttingPressure(int level);

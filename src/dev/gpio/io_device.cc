@@ -1,12 +1,8 @@
 #include "io_device.h"
 
-#ifdef NML_OLC_COMPAT
-#include <rcs_print.hh>
-#else
-#include <rcs_prnt.hh>
-#endif
-
 #include <cassert>
+
+#include <rcs_prnt.hh>
 
 int IoDevice::GetPortNoByFuncId(int func_id) {
   std::map<int, int>::iterator it = io_cfg_.func_map_.find(func_id);
@@ -19,7 +15,7 @@ int IoDevice::GetPortNoByFuncId(int func_id) {
 
 int IoDevice::Open(int port, int mode) {
   if (mode == IO_OP_PORT_NO) {
-    assert(port < IO_PORT_SIZE);
+    assert(port < MAX_IO_PORT_SIZE);
     ports_.set(port, 1);
   } else {
     ports_.set(GetPortNoByFuncId(port), 1);
@@ -30,7 +26,7 @@ int IoDevice::Open(int port, int mode) {
 
 int IoDevice::Close(int port, int mode) {
   if (mode == IO_OP_PORT_NO) {
-    assert(port < IO_PORT_SIZE);
+    assert(port < MAX_IO_PORT_SIZE);
     ports_.set(port, 0);
   } else {
     ports_.set(GetPortNoByFuncId(port), 0);
@@ -41,7 +37,7 @@ int IoDevice::Close(int port, int mode) {
 
 int IoDevice::GetPortState(int port, int mode) {
   if (mode == IO_OP_PORT_NO) {
-    assert(port < IO_PORT_SIZE);
+    assert(port < MAX_IO_PORT_SIZE);
     return ports_[port];
   } else {
     return ports_[GetPortNoByFuncId(port)];  

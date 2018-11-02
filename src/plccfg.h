@@ -1,6 +1,9 @@
 #ifndef PLCCFG_H_
 #define PLCCFG_H_
 
+#include <iostream>
+#include <vector>
+
 // Auto command macro format: device_operate_level
 // e.g. GAS_OPEN_CUTTING
 //      GAS_OPEN_FIRST
@@ -128,6 +131,93 @@ struct ProcessCfg {
   int cutting;
   bool cooling;
   int craft_level;
+};
+
+class GasCfg {
+ public:
+  GasCfg(): gas_(CRAFT_LEVELS, 0), pressure_(CRAFT_LEVELS, 0.){}
+
+  std::vector<int> gas_;
+  std::vector<double> pressure_;
+  void Show() {
+    for (int i = 0; i < CRAFT_LEVELS; i++) {
+      std::cout << gas_[i] << " pressure:" << pressure_[i] << std::endl;
+    }
+  }
+};
+
+class LaserCfg {
+ public:
+  LaserCfg(): peak_power_(CRAFT_LEVELS, 100), duty_ratio_(CRAFT_LEVELS, 100),
+      pulse_frequency_(CRAFT_LEVELS, 5000), type_(CRAFT_LEVELS, 0) {}
+
+  std::vector<double> peak_power_;
+  std::vector<double> duty_ratio_;
+  std::vector<int> pulse_frequency_;
+  std::vector<int> type_;
+  
+  void Show() {
+    for (int i = 0; i < CRAFT_LEVELS; i++) {
+      std::cout << "peak power:" << peak_power_[i]
+          << " duty ratio:" << duty_ratio_[i]
+          << " pulse frequency:" << pulse_frequency_[i] 
+          << " laser type:" << type_[i] << std::endl;
+
+    }
+  }
+};
+
+class FollowerCfg {
+ public:
+  FollowerCfg(): height_(CRAFT_LEVELS, 0.), incr_enable_(CRAFT_LEVELS, false),
+      incr_time_(CRAFT_LEVELS, 0.), lift_height_(0.), no_follow_(false) {}
+
+  std::vector<double> height_;
+  std::vector<bool> incr_enable_;
+  std::vector<double> incr_time_;
+  double lift_height_;
+  bool no_follow_;
+
+  void Show() {
+    for (int i = 0; i < CRAFT_LEVELS; i++) {
+      std::cout << i << "->height:" << height_[i] << " incr_enable:" <<
+        incr_enable_[i] << " incr_time:" << incr_time_[i] << std::endl;
+    }
+    std::cout << "lift height:" << lift_height_ << std::endl;
+    std::cout << "no follow:" << no_follow_ << std::endl;
+  }
+};
+
+class FocusCfg {
+ public:
+  FocusCfg(): position_(CRAFT_LEVELS, 0) {}
+
+  std::vector<double> position_;
+  void Show() {
+    for (int i = 0; i < CRAFT_LEVELS; i++) {
+      std::cout << "position:" << position_[i] << std::endl;
+    }
+  }
+};
+
+class DelayCfg {
+ public:
+  DelayCfg(): stay_(CRAFT_LEVELS, 3000),
+      laser_off_blow_time_(CRAFT_LEVELS, 500),
+      blow_enable_(CRAFT_LEVELS, false) {}
+
+  std::vector<double> stay_;
+  std::vector<double> laser_off_blow_time_;
+  std::vector<bool> blow_enable_;
+  
+  void Show() {
+    for (int i = 0; i < CRAFT_LEVELS; i++) {
+      std::cout << "stay time:" << stay_[i]
+          << " laser off blow:" << laser_off_blow_time_[i]
+          << " blow enable:" << blow_enable_[i] << std::endl;
+
+    }
+  }
 };
 
 #endif

@@ -24,6 +24,7 @@ PLCTask::PLCTask(double sleep_time):
     task_eager_(0) {
     
   memset(error_, 0, NML_ERROR_LEN);
+  gas_.ConnectIoDevice(&out_dev_);
 }
 
 PLCTask::~PLCTask() {
@@ -366,34 +367,21 @@ int PLCTask::UpdateTaskStatus() {
   rcs_print(err_msg);               \
   sprintf(error_, "%s", err_msg)
  
-ModbusManager *PLCTask::GetModbusMaster(int master_id) {
-  if (master_id == 0) {
-    return &thc_master_;
-  }
-  ERROR_REPORT("no such modbus master workstation\n");
-  return NULL;
-}
-
 int PLCTask::ModbusInit(NMLmsg *cmd) {
   MODBUS_INIT_MSG *msg = (MODBUS_INIT_MSG *)cmd;
   char ip_device[100] = {0};
   memcpy(ip_device, msg->ip_device, msg->ip_device_length);
 
-  ModbusManager *manager = GetModbusMaster(msg->master_id_);
-  if (!manager) {
-    return 0;
-  }
-
   ModbusStation *station = new ModbusStation;
-  int ret = station->InitModbus(msg->type_, ip_device, msg->ip_port_, msg->baud_,
-      msg->parity_, msg->slave_id_);
+  int ret = station->InitModbus(msg->type_, ip_device, msg->ip_port_,
+      msg->baud_, msg->parity_, msg->slave_id_);
 
   if (ret < 0) {
     memset(error_, 0, NML_ERROR_LEN);
     station->GetErrMsg(error_);
     delete station;
   } else {
-    manager->Register(msg->slave_id_, station);
+    modbus_manager_.Register(msg->master_id_, station);
     rcs_print("Modbus Init Success!\n");
   }
   return ret;
@@ -401,30 +389,25 @@ int PLCTask::ModbusInit(NMLmsg *cmd) {
 
 int PLCTask::ModbusRead(NMLmsg *cmd) {
   MODBUS_READ_MSG *read_msg = (MODBUS_READ_MSG *)cmd;
-  ModbusManager *manager = GetModbusMaster(read_msg->master_id_);
-  if (!manager) {
-    return 0;
-  }
-
   int rc = 0;
   switch (read_msg->type_) {
     case MB_REGISTER_BITS:
-      rc = ModbusReadBits(manager, read_msg->slave_id_, read_msg->addr_,
-          read_msg->nb_);
+      rc = ModbusReadBits(read_msg->master_id_, read_msg->slave_id_,
+          read_msg->addr_, read_msg->nb_);
 
       break;
     case MB_REGISTER_INPUT_BITS:
-      rc = ModbusReadInputBits(manager, read_msg->slave_id_, read_msg->addr_,
-          read_msg->nb_);
+      rc = ModbusReadInputBits(read_msg->master_id_, read_msg->slave_id_,
+          read_msg->addr_, read_msg->nb_);
 
       break;
     case MB_REGISTER_REGISTERS:
-      rc = ModbusReadRegisters(manager, read_msg->slave_id_, read_msg->addr_,
-          read_msg->nb_);
+      rc = ModbusReadRegisters(read_msg->master_id_, read_msg->slave_id_,
+          read_msg->addr_, read_msg->nb_);
 
       break;
     case MB_REGISTER_INPUT_REGISTERS:
-      rc = ModbusReadInputRegisters(manager, read_msg->slave_id_,
+      rc = ModbusReadInputRegisters(read_msg->master_id_, read_msg->slave_id_,
           read_msg->addr_, read_msg->nb_);
       
       break;
@@ -436,8 +419,11 @@ int PLCTask::ModbusRead(NMLmsg *cmd) {
 
 #define MODBUS_MANAGER_RW(modbus_func) \
   int ret = 0; \
-  ModbusStation *station = manager->GetStation(slave_id); \
+  ModbusStation *station = modbus_manager_.GetStation(master_id); \
   if (station) { \
+    if (station->SlaveId() != slave_id) { \
+      station->SetSlaveId(slave_id); \
+    } \
     ret = station->modbus_func(addr, nb, tab_rp_regs); \
     if (ret > 0) { \
       reply_nb = ret; \
@@ -451,16 +437,14 @@ int PLCTask::ModbusRead(NMLmsg *cmd) {
   } \
   return ret;
 
-int PLCTask::ModbusReadBits(ModbusManager *manager, int slave_id,
-    int addr, int nb) {
-
+int PLCTask::ModbusReadBits(int master_id, int slave_id, int addr, int nb) {
   uint8_t *tab_rp_regs = (uint8_t *)(plc_status_->modbus_bits);
   int &reply_nb = plc_status_->modbus_bits_length ;
 
   MODBUS_MANAGER_RW(ReadBits);
 }
 
-int PLCTask::ModbusReadInputBits(ModbusManager *manager, int slave_id,
+int PLCTask::ModbusReadInputBits(int master_id, int slave_id,
     int addr, int nb) {
 
   uint8_t *tab_rp_regs = (uint8_t *)(plc_status_->modbus_input_bits);
@@ -469,7 +453,7 @@ int PLCTask::ModbusReadInputBits(ModbusManager *manager, int slave_id,
   MODBUS_MANAGER_RW(ReadInputBits)
 }
 
-int PLCTask::ModbusReadRegisters(ModbusManager *manager, int slave_id,
+int PLCTask::ModbusReadRegisters(int master_id, int slave_id,
     int addr, int nb) {
 
   uint16_t *tab_rp_regs = \
@@ -480,7 +464,7 @@ int PLCTask::ModbusReadRegisters(ModbusManager *manager, int slave_id,
   MODBUS_MANAGER_RW(ReadRegisters)
 }
 
-int PLCTask::ModbusReadInputRegisters(ModbusManager *manager, int slave_id,
+int PLCTask::ModbusReadInputRegisters(int master_id, int slave_id,
     int addr, int nb) {
 
   uint16_t *tab_rp_regs = \
@@ -491,7 +475,7 @@ int PLCTask::ModbusReadInputRegisters(ModbusManager *manager, int slave_id,
   MODBUS_MANAGER_RW(ReadInputRegisters)
 }
 
-int PLCTask::ModbusWriteBits(ModbusManager *manager, int slave_id,
+int PLCTask::ModbusWriteBits(int master_id, int slave_id,
     int addr, int nb, const unsigned char *src) {
 
   uint8_t *tab_rp_regs = (uint8_t *)src;
@@ -500,7 +484,7 @@ int PLCTask::ModbusWriteBits(ModbusManager *manager, int slave_id,
   MODBUS_MANAGER_RW(WriteBits)
 }
 
-int PLCTask::ModbusWriteRegisters(ModbusManager *manager, int slave_id,
+int PLCTask::ModbusWriteRegisters(int master_id, int slave_id,
     int addr, int nb, const unsigned short *src) {
 
   uint16_t *tab_rp_regs = (uint16_t *)src;
@@ -509,12 +493,15 @@ int PLCTask::ModbusWriteRegisters(ModbusManager *manager, int slave_id,
   MODBUS_MANAGER_RW(WriteRegisters)
 }
 
-int PLCTask::ModbusWriteBit(ModbusManager *manager, int slave_id,
+int PLCTask::ModbusWriteBit(int master_id, int slave_id,
     int addr, int status) {
 
   int ret = 0;
-  ModbusStation *station = manager->GetStation(slave_id);
+  ModbusStation *station = modbus_manager_.GetStation(slave_id);
   if (station) {
+    if (station->SlaveId() != slave_id) {
+      station->SetSlaveId(slave_id);
+    }
     ret = station->WriteBit(addr, status);
     if (ret < 0) {
       memset(error_, 0, NML_ERROR_LEN);
@@ -527,12 +514,15 @@ int PLCTask::ModbusWriteBit(ModbusManager *manager, int slave_id,
   return ret;
 }
 
-int PLCTask::ModbusWriteRegister(ModbusManager *manager, int slave_id,
+int PLCTask::ModbusWriteRegister(int master_id, int slave_id,
     int addr, int value) {
  
   int ret = 0;
-  ModbusStation *station = manager->GetStation(slave_id);
+  ModbusStation *station = modbus_manager_.GetStation(slave_id);
   if (station) {
+    if (station->SlaveId() != slave_id) {
+      station->SetSlaveId(slave_id);
+    }
     ret = station->WriteRegister(addr, value);
     if (ret < 0) {
       memset(error_, 0, NML_ERROR_LEN);
@@ -547,30 +537,26 @@ int PLCTask::ModbusWriteRegister(ModbusManager *manager, int slave_id,
 
 int PLCTask::ModbusWrite(NMLmsg *cmd) {
   MODBUS_WRITE_MSG *write_msg = (MODBUS_WRITE_MSG *)cmd;
-  ModbusManager *manager = GetModbusMaster(write_msg->master_id_);
-  if (!manager) {
-    return 0;
-  }
   int rc = 0;
   switch (write_msg->type_) {
     case MB_REGISTER_BITS:
       if (write_msg->nb_ == 1) {
-        rc = ModbusWriteBit(manager, write_msg->slave_id_,
+        rc = ModbusWriteBit(write_msg->master_id_, write_msg->slave_id_,
             write_msg->addr_, write_msg->bits[0]);
 
       } else {
-        rc = ModbusWriteBits(manager, write_msg->slave_id_,
+        rc = ModbusWriteBits(write_msg->master_id_, write_msg->slave_id_,
             write_msg->addr_, write_msg->nb_, write_msg->bits);
 
       }
       break;
     case MB_REGISTER_REGISTERS:
       if (write_msg->nb_ == 1) {
-        rc = ModbusWriteRegister(manager, write_msg->slave_id_,
+        rc = ModbusWriteRegister(write_msg->master_id_, write_msg->slave_id_,
             write_msg->addr_, write_msg->registers[0]);
 
       } else {
-        rc = ModbusWriteRegisters(manager, write_msg->slave_id_,
+        rc = ModbusWriteRegisters(write_msg->master_id_, write_msg->slave_id_,
             write_msg->addr_, write_msg->nb_, write_msg->registers);
 
       }

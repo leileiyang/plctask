@@ -9,8 +9,8 @@ class ModbusManager {
  public:
   ModbusManager() {}
   ~ModbusManager();
-  void Register(int slave_id, ModbusStation *station);
-  ModbusStation *GetStation(int slave_id);
+  void Register(int master_id, ModbusStation *station);
+  ModbusStation *GetStation(int master_id);
  private:
   std::map<int, ModbusStation *> stations_;
 
