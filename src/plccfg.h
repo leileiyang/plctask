@@ -119,6 +119,10 @@ enum PLC_CMD_ENUM {
   GAS_HIGH_O2 = 404,
   GAS_HIGH_N2 = 405,
 
+  // Laser function id
+  LASER_SWITCH = 420,
+  LASER_SHUTTER = 421,
+
 };
 
 struct ProcessCfg {

@@ -33,6 +33,7 @@ PlcTask::PlcTask(double sleep_time):
     
   memset(error_, 0, NML_ERROR_LEN);
   gas_.ConnectIoDevice(&out_dev_);
+  laser_.ConnectIoDevice(&out_dev_);
 }
 
 PlcTask::~PlcTask() {
@@ -134,10 +135,7 @@ void PlcTask::Shutdown() {
     delete plc_cmd_buffer_;
     plc_cmd_buffer_ = NULL;
   }
-  if (NULL != plc_command_) {
-    delete plc_command_;
-    plc_command_ = NULL;
-  }
+
   if (NULL != plc_status_) {
     delete plc_status_;
     plc_status_ = NULL;
@@ -145,11 +143,12 @@ void PlcTask::Shutdown() {
 }
 
 bool PlcTask::Run() {
-  double start_time = etime();
-  double end_time = 0;
+  //double start_time = etime();
+  //double end_time = 0;
+  //double elapse = 0;
   rcs_print("Plc task start running...!\n");
   while (running_) {
-    end_time = etime();
+    //end_time = etime();
     /// Job
     // 1 read a command
     if (0 != plc_cmd_buffer_->peek()) {
@@ -180,8 +179,8 @@ bool PlcTask::Run() {
     plc_status_->command_type = plc_command_->type;
     plc_stat_buffer_->write(plc_status_);
     
-    //std::cout << end_time - start_time << std::endl;
-    start_time = end_time;
+    //elapse = end_time - start_time;
+    //start_time = end_time;
     if (task_eager_) {
       task_eager_ = 0;
     } else {

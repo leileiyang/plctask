@@ -5,9 +5,9 @@
 
 class IoDevice;
 
-class IOGas: public GasInterface {
+class IoGas: public GasInterface {
  public:
-  explicit IOGas(IoDevice *io_dev): io_dev_(io_dev) {}
+  explicit IoGas(IoDevice *io_dev): io_dev_(io_dev) {}
   virtual bool Open(int gas_id);
   virtual bool Close(int gas_id);
   virtual bool SetPressure(int gas_id, double pressure);

@@ -50,7 +50,7 @@ int Gas::ConnectInterface(GasInterface *gas_intf) {
 }
 
 int Gas::ConnectIoDevice(IoDevice* io_dev) {
-  gas_intf_ = new IOGas(io_dev);
+  gas_intf_ = new IoGas(io_dev);
   return 0;
 }
 

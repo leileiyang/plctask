@@ -9,6 +9,7 @@
 #include "job/jobmanager.h"
 #include "dev/modbus/modbus_manager.h"
 #include "dev/gas/gas.h"
+#include "dev/laser/laser.h"
 #include "dev/gpio/io_device.h"
 #include "nml_intf/interpl.h"
 #include "nml_intf/plc_nml.h"
@@ -95,6 +96,8 @@ class PlcTask {
   double delay_left_;
   int CuttingStay(int level);
   int CuttingBlow(int level);
+
+  Laser laser_;
 
 };
 
