@@ -4,6 +4,8 @@
 #include <string>
 #include <timer.hh>
 
+#include "plccfg.h"
+
 #include "job/jobmanager.h"
 #include "dev/modbus/modbus_manager.h"
 #include "dev/gas/gas.h"
@@ -15,13 +17,14 @@ enum PLC_TASK_EXEC_ENUM {
   PLC_TASK_EXEC_ERROR = 1,
   PLC_TASK_EXEC_DONE = 2,
   PLC_TASK_EXEC_WAITING_FOR_DEVICES = 3,
+  PLC_TASK_EXEC_WAITING_FOR_DELAY = 4,
 
 };
 
-class PLCTask {
+class PlcTask {
  public:
-  PLCTask(double sleep_time);
-  virtual ~PLCTask();
+  PlcTask(double sleep_time);
+  virtual ~PlcTask();
 
   bool Run();
   void Shutdown();
@@ -79,9 +82,19 @@ class PLCTask {
 
   IoDevice out_dev_;
   Gas gas_;
+  int current_layer_;
+  PlcGlobalCfg plc_global_cfg_;
+  std::vector<PlcCfg> plc_cfg_;
+
+  bool gas_delay_;
   int OpenGas(int gas_id);
   int OpenCuttingGas(int level);
   int SetCuttingPressure(int level);
+
+  double delay_timeout_;
+  double delay_left_;
+  int CuttingStay(int level);
+  int CuttingBlow(int level);
 
 };
 

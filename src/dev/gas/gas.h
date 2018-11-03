@@ -5,13 +5,10 @@
 
 #include "gas_interface.h"
 
-enum GAS_ID {
-  GAS_AIR,
-  GAS_O2,
-  GAS_N2,
-  GAS_HIGH_AIR,
-  GAS_HIGH_O2,
-  GAS_HIGH_N2,
+enum GAS_OPEN_DELAY_TYPE {
+  GAS_OPEN_NO_DELAY = 0,
+  GAS_OPEN_FIRST_DELAY,
+  GAS_OPEN_SWITCH_DELAY,
 };
 
 class IoDevice;

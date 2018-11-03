@@ -32,8 +32,8 @@
 #define LASER_PULSE_FREQUENCY_TYPE       ((NMLTYPE) 246)
 #define LASER_TYPE_TYPE                  ((NMLTYPE) 247)
 
-#define DELAY_BLOW_TYPE                  ((NMLTYPE) 250)
-#define DELAY_STAY_TYPE                  ((NMLTYPE) 251)
+#define CUTTING_DELAY_BLOW_TYPE          ((NMLTYPE) 250)
+#define CUTTING_DELAY_STAY_TYPE          ((NMLTYPE) 251)
 
 #define FOCUS_POSITION_TYPE              ((NMLTYPE) 260)
 

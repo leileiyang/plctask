@@ -1,6 +1,7 @@
 #include "gas.h"
 #include "gas_interface.h"
 #include "io_gas.h"
+#include "plccfg.h"
 
 #ifdef NML_OLC_COMPAT
 #include <rcs_print.hh>
@@ -57,8 +58,14 @@ int Gas::Open(int gas_id) {
   if (gas_intf_->Open(gas_id)) {
     rcs_print("Gas Open %s\n", gas_items[gas_id].name.c_str());
     gas_items[gas_id].state = 1;
+    int ret = GAS_OPEN_NO_DELAY;
+    if (working_gas_ < 0) {
+      ret = GAS_OPEN_FIRST_DELAY;
+    } else if (working_gas_ != gas_id) {
+      ret = GAS_OPEN_SWITCH_DELAY;
+    }
     working_gas_ = gas_id;
-    return 0; 
+    return ret; 
   } else {
     return -1;
   }

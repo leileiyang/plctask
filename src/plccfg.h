@@ -220,4 +220,19 @@ class DelayCfg {
   }
 };
 
+class PlcGlobalCfg {
+ public:
+  double open_gas_delay_;
+  double switch_gas_delay_;
+};
+
+class PlcCfg {
+ public:
+  ProcessCfg process_cfg_;
+  GasCfg gas_cfg_;
+  LaserCfg laser_cfg_;
+  DelayCfg delay_cfg_;
+
+};
+
 #endif

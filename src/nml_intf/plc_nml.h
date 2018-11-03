@@ -247,17 +247,17 @@ class IO_CFG_MSG: public JOB_CMD_MSG {
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(short, func_id, IO_PORT_SIZE)
 };
 
-class DELAY_BLOW: public JOB_CMD_MSG {
+class CUTTING_DELAY_BLOW: public JOB_CMD_MSG {
  public:
-  DELAY_BLOW();
+  CUTTING_DELAY_BLOW();
   void update(CMS *cms);
 
   int level_;
 };
 
-class DELAY_STAY: public JOB_CMD_MSG {
+class CUTTING_DELAY_STAY: public JOB_CMD_MSG {
  public:
-  DELAY_STAY();
+  CUTTING_DELAY_STAY();
   void update(CMS *cms);
 
   int level_;

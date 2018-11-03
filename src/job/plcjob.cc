@@ -1,6 +1,6 @@
 #include "job/plcjob.h"
 
-#include "plccfg/plccfg.h"
+#include "plccfg.h"
 
 #include <string.h>
 
@@ -129,13 +129,13 @@ int PlcJob::AppendCommand(short plc_cmd_id) {
     case DELAY_BLOW_FIRST:
     case DELAY_BLOW_SECOND:
     case DELAY_BLOW_THIRD:
-      APPEND_COMMAND_LEVEL(DELAY_BLOW, plc_cmd_id - DELAY_BLOW_CUTTING)
+      APPEND_COMMAND_LEVEL(CUTTING_DELAY_BLOW, plc_cmd_id - DELAY_BLOW_CUTTING)
       break;
     case DELAY_STAY_CUTTING:
     case DELAY_STAY_FIRST:
     case DELAY_STAY_SECOND:
     case DELAY_STAY_THIRD:
-      APPEND_COMMAND_LEVEL(DELAY_STAY, plc_cmd_id - DELAY_STAY_CUTTING)
+      APPEND_COMMAND_LEVEL(CUTTING_DELAY_STAY, plc_cmd_id - DELAY_STAY_CUTTING)
       break;
     // Focus Command
     case FOCUS_POSITION_CUTTING:
