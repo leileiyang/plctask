@@ -50,19 +50,20 @@ class SECOND_CMD_MSG: public RCS_CMD_MSG {
   int x;
 };
 
-class JOB_CMD_MSG: public RCS_CMD_MSG {
+class PLC_CMD_MSG: public RCS_CMD_MSG {
  public:
-  JOB_CMD_MSG(NMLTYPE t, size_t s): RCS_CMD_MSG(t, s),
-      cmd_id_(0),job_id_(-1) {}
+  PLC_CMD_MSG(NMLTYPE t, size_t s): RCS_CMD_MSG(t, s),
+      cmd_id_(0),job_id_(-1), exec_(0) {}
 
   void update(CMS *cms);
   int cmd_id_;
   int job_id_;
+  short exec_;
 };
 
-class MODBUS_CMD_MSG: public JOB_CMD_MSG {
+class MODBUS_CMD_MSG: public PLC_CMD_MSG {
  public:
-  MODBUS_CMD_MSG(NMLTYPE t, size_t s): JOB_CMD_MSG(t, s),
+  MODBUS_CMD_MSG(NMLTYPE t, size_t s): PLC_CMD_MSG(t, s),
       master_id_(0),slave_id_(0) {}
 
   void update(CMS *cms);
@@ -116,6 +117,8 @@ class PLC_STAT: public PLC_STAT_MSG {
   void update(CMS *cms);
 
   int status_;
+  int job_id_;
+  int plc_cmd_id_;
 
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, modbus_bits, MODBUS_REGISTER_SIZE)
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, modbus_input_bits, MODBUS_REGISTER_SIZE)
@@ -123,13 +126,13 @@ class PLC_STAT: public PLC_STAT_MSG {
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, modbus_input_registers, MODBUS_REGISTER_SIZE)
 };
 
-class JOB_ABORT_MSG: public JOB_CMD_MSG {
+class JOB_ABORT_MSG: public PLC_CMD_MSG {
  public:
   JOB_ABORT_MSG();
   void update(CMS *cms);
 };
 
-class OPEN_GAS: public JOB_CMD_MSG {
+class OPEN_GAS: public PLC_CMD_MSG {
  public:
   OPEN_GAS();
   void update(CMS *cms);
@@ -137,7 +140,7 @@ class OPEN_GAS: public JOB_CMD_MSG {
   int gas_id_;
 };
 
-class OPEN_CUTTING_GAS: public JOB_CMD_MSG {
+class OPEN_CUTTING_GAS: public PLC_CMD_MSG {
  public:
   OPEN_CUTTING_GAS();
   void update(CMS *cms);
@@ -145,7 +148,7 @@ class OPEN_CUTTING_GAS: public JOB_CMD_MSG {
   int level_;
 };
 
-class SET_CUTTING_PRESSURE: public JOB_CMD_MSG {
+class SET_CUTTING_PRESSURE: public PLC_CMD_MSG {
  public:
   SET_CUTTING_PRESSURE();
   void update(CMS *cms);
@@ -153,7 +156,7 @@ class SET_CUTTING_PRESSURE: public JOB_CMD_MSG {
   int level_;
 };
 
-class LHC_FOLLOW: public JOB_CMD_MSG {
+class LHC_FOLLOW: public PLC_CMD_MSG {
  public:
   LHC_FOLLOW();
   void update(CMS *cms);
@@ -161,7 +164,7 @@ class LHC_FOLLOW: public JOB_CMD_MSG {
   int level_;
 };
 
-class LHC_PROGRESSIVE_FOLLOW: public JOB_CMD_MSG {
+class LHC_PROGRESSIVE_FOLLOW: public PLC_CMD_MSG {
  public:
   LHC_PROGRESSIVE_FOLLOW();
   void update(CMS *cms);
@@ -169,43 +172,43 @@ class LHC_PROGRESSIVE_FOLLOW: public JOB_CMD_MSG {
   int level_;
 };
 
-class LHC_LIFT_CMD: public JOB_CMD_MSG {
+class LHC_LIFT_CMD: public PLC_CMD_MSG {
  public:
   LHC_LIFT_CMD();
   void update(CMS *cms);
 };
 
-class LHC_Z_AXIS_HOLD_CMD: public JOB_CMD_MSG {
+class LHC_Z_AXIS_HOLD_CMD: public PLC_CMD_MSG {
  public:
   LHC_Z_AXIS_HOLD_CMD();
   void update(CMS *cms);
 };
 
-class LASER_ON_CMD: public JOB_CMD_MSG {
+class LASER_ON_CMD: public PLC_CMD_MSG {
  public:
   LASER_ON_CMD();
   void update(CMS *cms);
 };
 
-class LASER_OFF_CMD: public JOB_CMD_MSG {
+class LASER_OFF_CMD: public PLC_CMD_MSG {
  public:
   LASER_OFF_CMD();
   void update(CMS *cms);
 };
 
-class LASER_SHUTTER_ON_CMD: public JOB_CMD_MSG {
+class LASER_SHUTTER_ON_CMD: public PLC_CMD_MSG {
  public:
   LASER_SHUTTER_ON_CMD();
   void update(CMS *cms);
 };
 
-class LASER_SHUTTER_OFF_CMD: public JOB_CMD_MSG {
+class LASER_SHUTTER_OFF_CMD: public PLC_CMD_MSG {
  public:
   LASER_SHUTTER_OFF_CMD();
   void update(CMS *cms);
 };
 
-class LASER_POWER: public JOB_CMD_MSG {
+class LASER_POWER: public PLC_CMD_MSG {
  public:
   LASER_POWER();
   void update(CMS *cms);
@@ -213,7 +216,7 @@ class LASER_POWER: public JOB_CMD_MSG {
   int level_;
 };
 
-class LASER_DUTYRATIO: public JOB_CMD_MSG {
+class LASER_DUTYRATIO: public PLC_CMD_MSG {
  public:
   LASER_DUTYRATIO();
   void update(CMS *cms);
@@ -221,7 +224,7 @@ class LASER_DUTYRATIO: public JOB_CMD_MSG {
   int level_;
 };
 
-class LASER_PULSE_FREQUENCY: public JOB_CMD_MSG {
+class LASER_PULSE_FREQUENCY: public PLC_CMD_MSG {
  public:
   LASER_PULSE_FREQUENCY();
   void update(CMS *cms);
@@ -229,7 +232,7 @@ class LASER_PULSE_FREQUENCY: public JOB_CMD_MSG {
   int level_;
 };
 
-class LASER_TYPE: public JOB_CMD_MSG {
+class LASER_TYPE: public PLC_CMD_MSG {
  public:
   LASER_TYPE();
   void update(CMS *cms);
@@ -237,7 +240,7 @@ class LASER_TYPE: public JOB_CMD_MSG {
   int level_;
 };
 
-class IO_CFG_MSG: public JOB_CMD_MSG {
+class IO_CFG_MSG: public PLC_CMD_MSG {
  public:
   IO_CFG_MSG();
   void update(CMS *cms);
@@ -247,7 +250,7 @@ class IO_CFG_MSG: public JOB_CMD_MSG {
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(short, func_id, IO_PORT_SIZE)
 };
 
-class CUTTING_DELAY_BLOW: public JOB_CMD_MSG {
+class CUTTING_DELAY_BLOW: public PLC_CMD_MSG {
  public:
   CUTTING_DELAY_BLOW();
   void update(CMS *cms);
@@ -255,7 +258,7 @@ class CUTTING_DELAY_BLOW: public JOB_CMD_MSG {
   int level_;
 };
 
-class CUTTING_DELAY_STAY: public JOB_CMD_MSG {
+class CUTTING_DELAY_STAY: public PLC_CMD_MSG {
  public:
   CUTTING_DELAY_STAY();
   void update(CMS *cms);
@@ -263,7 +266,7 @@ class CUTTING_DELAY_STAY: public JOB_CMD_MSG {
   int level_;
 };
 
-class FOCUS_POSITION: public JOB_CMD_MSG {
+class FOCUS_POSITION: public PLC_CMD_MSG {
  public:
   FOCUS_POSITION();
   void update(CMS *cms);
@@ -271,7 +274,7 @@ class FOCUS_POSITION: public JOB_CMD_MSG {
   int level_;
 };
 
-class PLC_JOB_MSG: public JOB_CMD_MSG {
+class PLC_JOB_MSG: public PLC_CMD_MSG {
  public:
   PLC_JOB_MSG();
   void update(CMS *cms);

@@ -82,11 +82,11 @@ class PlcTask {
   char error_[256];
 
   IoDevice out_dev_;
-  Gas gas_;
   int current_layer_;
   PlcGlobalCfg plc_global_cfg_;
   std::vector<PlcCfg> plc_cfg_;
 
+  Gas gas_;
   bool gas_delay_;
   int OpenGas(int gas_id);
   int OpenCuttingGas(int level);
@@ -98,6 +98,14 @@ class PlcTask {
   int CuttingBlow(int level);
 
   Laser laser_;
+  int LaserOn();
+  int LaserOff();
+  int ShutterOn();
+  int ShutterOff();
+  int SetCuttingPower(int level);
+  int SetCuttingDutyRation(int level);
+  int SetCuttingPulseFrequency(int level);
+  int SetCuttingLaserType(int level);
 
 };
 

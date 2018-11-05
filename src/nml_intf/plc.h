@@ -9,7 +9,7 @@
 #define MODBUS_INIT_MSG_TYPE             ((NMLTYPE) 109)
 #define MODBUS_WRITE_MSG_TYPE            ((NMLTYPE) 110)
 
-#define JOB_CMD_MSG_TYPE                 ((NMLTYPE) 200)
+#define PLC_CMD_MSG_TYPE                 ((NMLTYPE) 200)
 #define JOB_ABORT_MSG_TYPE               ((NMLTYPE) 202)
 
 #define PLC_JOB_MSG_TYPE                 ((NMLTYPE) 219)

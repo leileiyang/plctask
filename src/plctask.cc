@@ -201,8 +201,8 @@ int PlcTask::JobAbort() {
 
 int PlcTask::TaskIssueCommand(NMLmsg *cmd) {
   int retval = 0;
-  JOB_CMD_MSG *job_cmd = static_cast<JOB_CMD_MSG *>(cmd);
-  if (job_cmd->job_id_ >= 0) { // a queue job plc command
+  PLC_CMD_MSG *plc_cmd = static_cast<PLC_CMD_MSG *>(cmd);
+  if (plc_cmd->exec_ == 0) { // a queue job plc command
     job_manager_.AppendCommand(cmd);
     task_eager_ = 1;
     return 0;
@@ -644,4 +644,40 @@ int PlcTask::CuttingBlow(int level) {
 
   }
   return 0;
+}
+
+int PlcTask::LaserOn() {
+  return laser_.LaserOn();
+}
+
+int PlcTask::LaserOff() {
+  return laser_.LaserOn();
+}
+
+int PlcTask::ShutterOn() {
+  return laser_.ShutterOn();
+}
+
+int PlcTask::ShutterOff() {
+  return laser_.ShutterOff();
+}
+
+int PlcTask::SetCuttingPower(int level) {
+  return laser_.SetPower(\
+      plc_cfg_[current_layer_].laser_cfg_.peak_power_[level]);
+
+}
+
+int PlcTask::SetCuttingDutyRation(int level) {
+  return laser_.SetDutyRatio(\
+      plc_cfg_[current_layer_].laser_cfg_.duty_ratio_[level]);
+}
+
+int PlcTask::SetCuttingPulseFrequency(int level) {
+  return laser_.SetPulseFrequency(\
+      plc_cfg_[current_layer_].laser_cfg_.pulse_frequency_[level]);
+}
+
+int PlcTask::SetCuttingLaserType(int level) {
+  return laser_.SetType(plc_cfg_[current_layer_].laser_cfg_.type_[level]);
 }
