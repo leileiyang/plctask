@@ -207,7 +207,7 @@ int PlcTask::TaskIssueCommand(NMLmsg *cmd) {
     task_eager_ = 1;
     return 0;
   } else { // a alone job plc command, execute immediately
-    ;
+    plc_status_->plc_cmd_id_ = plc_cmd->cmd_id_;
   }
   switch (cmd->type) {
     case FIRST_CMD_MSG_TYPE:
@@ -215,6 +215,9 @@ int PlcTask::TaskIssueCommand(NMLmsg *cmd) {
       break;
     case SECOND_CMD_MSG_TYPE:
       rcs_print("Execute SECOND_CMD_MSG_TYPE!\n");
+      break;
+    case PLC_EXEC_JOB_TYPE:
+      retval = ExecuteJob(plc_cmd->job_id_);
       break;
     case JOB_ABORT_MSG_TYPE:
       retval = JobAbort();
@@ -253,6 +256,30 @@ int PlcTask::TaskIssueCommand(NMLmsg *cmd) {
     case CUTTING_DELAY_STAY_TYPE:
       retval = CuttingStay(((CUTTING_DELAY_STAY *)cmd)->level_);
       break;
+    case LASER_ON_CMD_TYPE:
+      retval = LaserOn();
+      break;
+    case LASER_OFF_CMD_TYPE:
+      retval = LaserOff();
+      break;
+    case LASER_SHUTTER_ON_CMD_TYPE:
+      retval = ShutterOn();
+      break;
+    case LASER_SHUTTER_OFF_CMD_TYPE:
+      retval = ShutterOff();
+      break;
+    case LASER_POWER_TYPE:
+      retval = SetCuttingPower(((LASER_POWER *)cmd)->level_);
+      break;
+    case LASER_DUTYRATIO_TYPE:
+      retval = SetCuttingDutyRation(((LASER_DUTYRATIO *)cmd)->level_);
+      break;
+    case LASER_PULSE_FREQUENCY_TYPE:
+      retval = SetCuttingPulseFrequency(((LASER_PULSE_FREQUENCY *)cmd)->level_);
+      break;
+    case LASER_TYPE_TYPE:
+      retval = SetCuttingLaserType(((LASER_TYPE *)cmd)->level_);
+      break;
     default:
       break;
   }
@@ -287,7 +314,9 @@ int PlcTask::Plan() {
       retval = TaskQueueCommand(plc_command_);
       break;
     // immediate command
+    case PLC_EXEC_JOB_TYPE:
     case JOB_ABORT_MSG_TYPE:
+    case OPEN_GAS_TYPE:
     case MODBUS_INIT_MSG_TYPE:
     case MODBUS_READ_MSG_TYPE:
     case MODBUS_WRITE_MSG_TYPE:
@@ -398,12 +427,19 @@ int PlcTask::UpdateTaskStatus() {
 }
 
 
+int PlcTask::ExecuteJob(int job_id) {
+  PlcJob *job = job_manager_.GetPlcJob(job_id);
+  if (job) {
+    job->ArrangeJob(task_list_);
+    plc_status_->job_id_ = job_id;
+  } else {
+    memset(error_, 0, NML_ERROR_LEN);
+    sprintf(error_, "no such job with id %d\n", job_id);
+    return -1;
+  }
+  return 0;
+}
 
-#define ERROR_REPORT(err_msg) \
-  memset(error_, 0, NML_ERROR_LEN); \
-  rcs_print(err_msg);               \
-  sprintf(error_, "%s", err_msg)
- 
 int PlcTask::ModbusInit(NMLmsg *cmd) {
   MODBUS_INIT_MSG *msg = (MODBUS_INIT_MSG *)cmd;
   char ip_device[100] = {0};

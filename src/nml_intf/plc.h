@@ -11,6 +11,7 @@
 
 #define PLC_CMD_MSG_TYPE                 ((NMLTYPE) 200)
 #define JOB_ABORT_MSG_TYPE               ((NMLTYPE) 202)
+#define PLC_EXEC_JOB_TYPE                ((NMLTYPE) 203)
 
 #define PLC_JOB_MSG_TYPE                 ((NMLTYPE) 219)
 

@@ -53,7 +53,7 @@ class SECOND_CMD_MSG: public RCS_CMD_MSG {
 class PLC_CMD_MSG: public RCS_CMD_MSG {
  public:
   PLC_CMD_MSG(NMLTYPE t, size_t s): RCS_CMD_MSG(t, s),
-      cmd_id_(0),job_id_(-1), exec_(0) {}
+      cmd_id_(0),job_id_(-1), exec_(1) {}
 
   void update(CMS *cms);
   int cmd_id_;
@@ -278,9 +278,14 @@ class PLC_JOB_MSG: public PLC_CMD_MSG {
  public:
   PLC_JOB_MSG();
   void update(CMS *cms);
-  int plc_job_id_;
 
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(short, plc_cmds, JOB_SIZE)
+};
+
+class PLC_EXEC_JOB: public PLC_CMD_MSG {
+ public:
+  PLC_EXEC_JOB();
+  void update(CMS *cms);
 };
 
 int plcFormat(NMLTYPE type, void *buffer, CMS *cms);

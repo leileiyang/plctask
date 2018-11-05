@@ -78,6 +78,7 @@ class PlcTask {
   int ModbusWriteRegisters(int master_id, int slave_id, int addr, int nb,
       const unsigned short *src);
 
+  int ExecuteJob(int job_id);
   int JobAbort();
   char error_[256];
 
