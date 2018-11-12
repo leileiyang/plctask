@@ -445,6 +445,10 @@ int PlcTask::ModbusInit(NMLmsg *cmd) {
   char ip_device[100] = {0};
   memcpy(ip_device, msg->ip_device, msg->ip_device_length);
 
+  if (modbus_manager_.IsMasterExist(msg->master_id_)) {
+    modbus_manager_.DeleteMaster(msg->master_id_);
+  }
+
   ModbusStation *station = new ModbusStation;
   int ret = station->InitModbus(msg->type_, ip_device, msg->ip_port_,
       msg->baud_, msg->parity_, msg->slave_id_);

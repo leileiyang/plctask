@@ -11,6 +11,9 @@ class ModbusManager {
   ~ModbusManager();
   void Register(int master_id, ModbusStation *station);
   ModbusStation *GetStation(int master_id);
+  bool IsMasterExist(int master_id);
+  void DeleteMaster(int master_id);
+
  private:
   std::map<int, ModbusStation *> stations_;
 
