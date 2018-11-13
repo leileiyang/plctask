@@ -110,7 +110,7 @@ int ModbusStation::WriteBit(int addr, int status) {
   int try_count = 3;
   int rc = 0;
   do {
-    int rc = modbus_write_bit(modbus_ctx_, addr, status);
+    rc = modbus_write_bit(modbus_ctx_, addr, status);
     if (rc < 0) {
       try_count--;
     } else {
@@ -131,7 +131,7 @@ int ModbusStation::WriteRegister(int addr, int value) {
   int try_count = 3;
   int rc = 0;
   do {
-    int rc = modbus_write_register(modbus_ctx_, addr, value);
+    rc = modbus_write_register(modbus_ctx_, addr, value);
     if (rc < 0) {
       try_count--;
     } else {
