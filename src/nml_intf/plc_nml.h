@@ -116,7 +116,6 @@ class PLC_STAT: public PLC_STAT_MSG {
 
   void update(CMS *cms);
 
-  int status_;
   int job_id_;
   int plc_cmd_id_;
 

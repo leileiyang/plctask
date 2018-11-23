@@ -15,7 +15,7 @@ void PlcJob::ArrangeJob(NML_INTERP_LIST &task_list) {
     command_list_.clear();
   } else {
     while (shadow_list_.len()) {
-      msg = command_list_.get();
+      msg = shadow_list_.get();
       task_list.append(msg);
       command_list_.append(msg);
     }
