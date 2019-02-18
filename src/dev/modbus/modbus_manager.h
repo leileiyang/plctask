@@ -3,14 +3,17 @@
 
 #include <map>
 
-#include "dev/modbus/modbus_station.hh"
+#include "dev/modbus/modbus_station.h"
 
 class ModbusManager {
  public:
   ModbusManager() {}
   ~ModbusManager();
-  void Register(int slave_id, ModbusStation *station);
-  ModbusStation *GetStation(int slave_id);
+  void Register(int master_id, ModbusStation *station);
+  ModbusStation *GetStation(int master_id);
+  bool IsMasterExist(int master_id);
+  void DeleteMaster(int master_id);
+
  private:
   std::map<int, ModbusStation *> stations_;
 

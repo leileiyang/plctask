@@ -1,10 +1,10 @@
-#include "dev/modbus/modbus_station.hh"
+#include "dev/modbus/modbus_station.h"
 
 #include <errno.h>
 #include <string.h>
 #include <rcs_prnt.hh>
 
-#include "nml_intf/plc_nml.hh"
+#include "nml_intf/plc_nml.h"
 
 ModbusStation::~ModbusStation() {
   ReleaseModbus();
@@ -41,6 +41,7 @@ int ModbusStation::InitModbus(int type, const char *ip_device, int ip_port,
       memset(error_, 0, ERROR_MSG_LEN);
       sprintf(error_, "Connection failed: %s\n", modbus_strerror(errno));
       modbus_free(modbus_ctx_);
+      modbus_ctx_ = NULL;
       return -2;
     }
   }
@@ -52,6 +53,7 @@ void ModbusStation::ReleaseModbus() {
     modbus_close(modbus_ctx_);
     modbus_free(modbus_ctx_);
   }
+  modbus_ctx_ = NULL;
 }
 
 #define MODBUS_READ_WRITE(modbus_func) \
@@ -108,7 +110,7 @@ int ModbusStation::WriteBit(int addr, int status) {
   int try_count = 3;
   int rc = 0;
   do {
-    int rc = modbus_write_bit(modbus_ctx_, addr, status);
+    rc = modbus_write_bit(modbus_ctx_, addr, status);
     if (rc < 0) {
       try_count--;
     } else {
@@ -129,7 +131,7 @@ int ModbusStation::WriteRegister(int addr, int value) {
   int try_count = 3;
   int rc = 0;
   do {
-    int rc = modbus_write_register(modbus_ctx_, addr, value);
+    rc = modbus_write_register(modbus_ctx_, addr, value);
     if (rc < 0) {
       try_count--;
     } else {

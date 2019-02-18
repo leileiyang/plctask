@@ -1,15 +1,18 @@
-#include "plctask.hh"
+#include "plctask.h"
 
 #include <stdio.h>
 #include <string.h>
 
-#include <nml_oi.hh>
-#include "nml_intf/plc_nml.hh"
-#include <rcs_prnt.hh>
-
 #include <iostream>
 
-PLCTask::PLCTask(double sleep_time):
+#include <nml_oi.hh>
+#include <rcs_prnt.hh>
+#include <timer.hh>
+
+#include "nml_intf/plc_nml.h"
+
+
+PlcTask::PlcTask(double sleep_time):
     exec_state_(PLC_TASK_EXEC_DONE),
     timer_(sleep_time),
     running_(true),
@@ -21,16 +24,23 @@ PLCTask::PLCTask(double sleep_time):
     plc_task_cmd_(NULL),
     plan_error_(0),
     execute_error_(0),
-    task_eager_(0) {
+    task_eager_(0),
+    current_layer_(0),
+    plc_cfg_(CRAFT_LAYERS, PlcCfg()),
+    gas_delay_(false),
+    delay_timeout_(0.),
+    delay_left_(0.) {
     
   memset(error_, 0, NML_ERROR_LEN);
+  gas_.ConnectIoDevice(&out_dev_);
+  laser_.ConnectIoDevice(&out_dev_);
 }
 
-PLCTask::~PLCTask() {
+PlcTask::~PlcTask() {
   Shutdown();
 }
 
-int PLCTask::Startup(std::string plc_nmlfile) {
+int PlcTask::Startup(std::string plc_nmlfile) {
   double end;
   int good;
 #define RETRY_TIME 10.0
@@ -109,7 +119,7 @@ int PLCTask::Startup(std::string plc_nmlfile) {
   return true;
 }
 
-void PLCTask::Shutdown() {
+void PlcTask::Shutdown() {
   running_ = false;
   if (NULL != plc_err_buffer_) {
     delete plc_err_buffer_;
@@ -125,22 +135,20 @@ void PLCTask::Shutdown() {
     delete plc_cmd_buffer_;
     plc_cmd_buffer_ = NULL;
   }
-  if (NULL != plc_command_) {
-    delete plc_command_;
-    plc_command_ = NULL;
-  }
+
   if (NULL != plc_status_) {
     delete plc_status_;
     plc_status_ = NULL;
   }
 }
 
-bool PLCTask::Run() {
-  double start_time = etime();
-  double end_time = 0;
+bool PlcTask::Run() {
+  //double start_time = etime();
+  //double end_time = 0;
+  //double elapse = 0;
   rcs_print("Plc task start running...!\n");
   while (running_) {
-    end_time = etime();
+    //end_time = etime();
     /// Job
     // 1 read a command
     if (0 != plc_cmd_buffer_->peek()) {
@@ -159,20 +167,22 @@ bool PLCTask::Run() {
 
     // do top level
     if (plan_error_ || execute_error_ || exec_state_ == PLC_TASK_EXEC_ERROR) {
-      plc_status_->status_ = RCS_ERROR;
+      plc_status_->status = RCS_ERROR;
     } else if (!plan_error_ && !execute_error_ && 
         exec_state_ == PLC_TASK_EXEC_DONE && task_list_.len() == 0 &&
         plc_task_cmd_ == 0) {
 
-      plc_status_->status_ = RCS_DONE;
+      plc_status_->status = RCS_DONE;
+    } else {
+      plc_status_->status = RCS_EXEC;
     }
 
     plc_status_->echo_serial_number = plc_command_->serial_number;
     plc_status_->command_type = plc_command_->type;
     plc_stat_buffer_->write(plc_status_);
     
-    //std::cout << end_time - start_time << std::endl;
-    start_time = end_time;
+    //elapse = end_time - start_time;
+    //start_time = end_time;
     if (task_eager_) {
       task_eager_ = 0;
     } else {
@@ -182,7 +192,7 @@ bool PLCTask::Run() {
   return true;
 }
 
-int PLCTask::JobAbort() {
+int PlcTask::JobAbort() {
   task_list_.clear();
   plan_error_ = 0;
   execute_error_  = 0;
@@ -191,19 +201,15 @@ int PLCTask::JobAbort() {
   return 0;
 }
 
-int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
+int PlcTask::TaskIssueCommand(NMLmsg *cmd) {
   int retval = 0;
-  JOB_CMD_MSG *job_cmd = static_cast<JOB_CMD_MSG *>(cmd);
-  if (job_cmd) {
-    if (job_cmd->job_id_ >= 0) { // a queue job plc command
-      job_manager_.AppendCommand(cmd);
-      task_eager_ = 1;
-      return 0;
-    } else { // a alone job plc command, execute immediately
-      ;
-    }
-  } else { // not a job command, execute immediately
-    ;
+  PLC_CMD_MSG *plc_cmd = static_cast<PLC_CMD_MSG *>(cmd);
+  if (plc_cmd->exec_ == 0) { // a queue job plc command
+    job_manager_.AppendCommand(cmd);
+    task_eager_ = 1;
+    return 0;
+  } else { // a alone job plc command, execute immediately
+    plc_status_->plc_cmd_id_ = plc_cmd->cmd_id_;
   }
   switch (cmd->type) {
     case FIRST_CMD_MSG_TYPE:
@@ -211,6 +217,9 @@ int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
       break;
     case SECOND_CMD_MSG_TYPE:
       rcs_print("Execute SECOND_CMD_MSG_TYPE!\n");
+      break;
+    case PLC_EXEC_JOB_TYPE:
+      retval = ExecuteJob(plc_cmd->job_id_);
       break;
     case JOB_ABORT_MSG_TYPE:
       retval = JobAbort();
@@ -234,13 +243,52 @@ int PLCTask::TaskIssueCommand(NMLmsg *cmd) {
         retval = -1;
       }
       break;
+    case OPEN_GAS_TYPE:
+      retval = OpenGas(((OPEN_GAS *)cmd)->gas_id_);
+      break;
+    case OPEN_CUTTING_GAS_TYPE:
+      retval = OpenCuttingGas(((OPEN_CUTTING_GAS *)cmd)->level_);
+      break;
+    case SET_CUTTING_PRESSURE_TYPE:
+      retval = SetCuttingPressure(((SET_CUTTING_PRESSURE *)cmd)->level_);
+      break;
+    case CUTTING_DELAY_BLOW_TYPE:
+      retval = CuttingBlow(((CUTTING_DELAY_BLOW *)cmd)->level_);
+      break;
+    case CUTTING_DELAY_STAY_TYPE:
+      retval = CuttingStay(((CUTTING_DELAY_STAY *)cmd)->level_);
+      break;
+    case LASER_ON_CMD_TYPE:
+      retval = LaserOn();
+      break;
+    case LASER_OFF_CMD_TYPE:
+      retval = LaserOff();
+      break;
+    case LASER_SHUTTER_ON_CMD_TYPE:
+      retval = ShutterOn();
+      break;
+    case LASER_SHUTTER_OFF_CMD_TYPE:
+      retval = ShutterOff();
+      break;
+    case LASER_POWER_TYPE:
+      retval = SetCuttingPower(((LASER_POWER *)cmd)->level_);
+      break;
+    case LASER_DUTYRATIO_TYPE:
+      retval = SetCuttingDutyRation(((LASER_DUTYRATIO *)cmd)->level_);
+      break;
+    case LASER_PULSE_FREQUENCY_TYPE:
+      retval = SetCuttingPulseFrequency(((LASER_PULSE_FREQUENCY *)cmd)->level_);
+      break;
+    case LASER_TYPE_TYPE:
+      retval = SetCuttingLaserType(((LASER_TYPE *)cmd)->level_);
+      break;
     default:
       break;
   }
   return retval;
 }
 
-int PLCTask::TaskQueueCommand(NMLmsg *cmd) {
+int PlcTask::TaskQueueCommand(NMLmsg *cmd) {
   if (cmd == 0) {
     return 0;
   }
@@ -248,7 +296,7 @@ int PLCTask::TaskQueueCommand(NMLmsg *cmd) {
   return 0;
 }
 
-int PLCTask::Plan() {
+int PlcTask::Plan() {
   NMLTYPE type;
   int retval = 0;
   // check for new command
@@ -268,7 +316,9 @@ int PLCTask::Plan() {
       retval = TaskQueueCommand(plc_command_);
       break;
     // immediate command
+    case PLC_EXEC_JOB_TYPE:
     case JOB_ABORT_MSG_TYPE:
+    case OPEN_GAS_TYPE:
     case MODBUS_INIT_MSG_TYPE:
     case MODBUS_READ_MSG_TYPE:
     case MODBUS_WRITE_MSG_TYPE:
@@ -280,11 +330,12 @@ int PLCTask::Plan() {
   return retval;
 }
 
-int PLCTask::Execute() {
+int PlcTask::Execute() {
   int retval = 0;
   switch (exec_state_) {
     case PLC_TASK_EXEC_ERROR:
       task_list_.clear();
+      plc_task_cmd_ = 0;
       exec_state_ = PLC_TASK_EXEC_DONE;
       break;
     case PLC_TASK_EXEC_DONE:
@@ -311,13 +362,20 @@ int PLCTask::Execute() {
       break;
     case PLC_TASK_EXEC_WAITING_FOR_DEVICES:
       break;
+    case PLC_TASK_EXEC_WAITING_FOR_DELAY:
+      delay_left_ = delay_timeout_ - etime();
+      if (etime() >= delay_timeout_) {
+        exec_state_ = PLC_TASK_EXEC_DONE;
+        delay_left_ = 0;
+      }
+      break;
     default:
       break;
   }
   return retval;
 }
 
-int PLCTask::CheckPreconditions(NMLmsg *cmd) {
+int PlcTask::CheckPreconditions(NMLmsg *cmd) {
   if (0 == cmd) {
     return PLC_TASK_EXEC_DONE;
   }
@@ -331,19 +389,36 @@ int PLCTask::CheckPreconditions(NMLmsg *cmd) {
   return PLC_TASK_EXEC_DONE;
 }
 
-int PLCTask::CheckPostconditions(NMLmsg *cmd) {
+int PlcTask::CheckPostconditions(NMLmsg *cmd) {
   if (0 == cmd) {
     return PLC_TASK_EXEC_DONE;
   }
   switch (cmd->type) {
+    case CUTTING_DELAY_STAY_TYPE:
+      return PLC_TASK_EXEC_WAITING_FOR_DELAY;
+    case CUTTING_DELAY_BLOW_TYPE: {
+      CUTTING_DELAY_BLOW *blow = (CUTTING_DELAY_BLOW *)cmd;
+      if (plc_cfg_[current_layer_].delay_cfg_.blow_enable_[blow->level_]) {
+        return PLC_TASK_EXEC_WAITING_FOR_DELAY;
+      } else {
+        return PLC_TASK_EXEC_DONE;
+      }
+                          }
+      break;
+    case OPEN_CUTTING_GAS_TYPE:
+      if (gas_delay_) {
+        return PLC_TASK_EXEC_WAITING_FOR_DELAY;
+      } else {
+        return PLC_TASK_EXEC_DONE;
+      }
+      break;
     default:
       return PLC_TASK_EXEC_DONE;
   }
   return PLC_TASK_EXEC_DONE;
-
 }
 
-int PLCTask::UpdateTaskStatus() {
+int PlcTask::UpdateTaskStatus() {
   if (strlen(error_)) {
     NML_ERROR error_msg;
     sprintf(error_msg.error, "%s", error_);
@@ -355,71 +430,64 @@ int PLCTask::UpdateTaskStatus() {
 }
 
 
-
-#define ERROR_REPORT(err_msg) \
-  memset(error_, 0, NML_ERROR_LEN); \
-  rcs_print(err_msg);               \
-  sprintf(error_, "%s", err_msg)
- 
-ModbusManager *PLCTask::GetModbusMaster(int master_id) {
-  if (master_id == 0) {
-    return &thc_master_;
+int PlcTask::ExecuteJob(int job_id) {
+  PlcJob *job = job_manager_.GetPlcJob(job_id);
+  if (job) {
+    job->ArrangeJob(task_list_);
+    plc_status_->job_id_ = job_id;
+  } else {
+    memset(error_, 0, NML_ERROR_LEN);
+    sprintf(error_, "no such job with id %d\n", job_id);
+    return -1;
   }
-  ERROR_REPORT("no such modbus master workstation\n");
-  return NULL;
+  return 0;
 }
 
-int PLCTask::ModbusInit(NMLmsg *cmd) {
+int PlcTask::ModbusInit(NMLmsg *cmd) {
   MODBUS_INIT_MSG *msg = (MODBUS_INIT_MSG *)cmd;
   char ip_device[100] = {0};
   memcpy(ip_device, msg->ip_device, msg->ip_device_length);
 
-  ModbusManager *manager = GetModbusMaster(msg->master_id_);
-  if (!manager) {
-    return 0;
+  if (modbus_manager_.IsMasterExist(msg->master_id_)) {
+    modbus_manager_.DeleteMaster(msg->master_id_);
   }
 
   ModbusStation *station = new ModbusStation;
-  int ret = station->InitModbus(msg->type_, ip_device, msg->ip_port_, msg->baud_,
-      msg->parity_, msg->slave_id_);
+  int ret = station->InitModbus(msg->type_, ip_device, msg->ip_port_,
+      msg->baud_, msg->parity_, msg->slave_id_);
 
   if (ret < 0) {
     memset(error_, 0, NML_ERROR_LEN);
     station->GetErrMsg(error_);
     delete station;
   } else {
-    manager->Register(msg->slave_id_, station);
+    modbus_manager_.Register(msg->master_id_, station);
     rcs_print("Modbus Init Success!\n");
   }
   return ret;
 }
 
-int PLCTask::ModbusRead(NMLmsg *cmd) {
+int PlcTask::ModbusRead(NMLmsg *cmd) {
   MODBUS_READ_MSG *read_msg = (MODBUS_READ_MSG *)cmd;
-  ModbusManager *manager = GetModbusMaster(read_msg->master_id_);
-  if (!manager) {
-    return 0;
-  }
-
   int rc = 0;
   switch (read_msg->type_) {
     case MB_REGISTER_BITS:
-      rc = ModbusReadBits(manager, read_msg->slave_id_, read_msg->addr_,
-          read_msg->nb_);
+      rc = ModbusReadBits(read_msg->master_id_, read_msg->slave_id_,
+          read_msg->addr_, read_msg->nb_);
 
       break;
     case MB_REGISTER_INPUT_BITS:
-      rc = ModbusReadInputBits(manager, read_msg->slave_id_, read_msg->addr_,
-          read_msg->nb_);
+      rc = ModbusReadInputBits(read_msg->master_id_, read_msg->slave_id_,
+          read_msg->addr_, read_msg->nb_);
 
       break;
     case MB_REGISTER_REGISTERS:
-      rc = ModbusReadRegisters(manager, read_msg->slave_id_, read_msg->addr_,
-          read_msg->nb_);
+      rc = ModbusReadRegisters(read_msg->master_id_, read_msg->slave_id_,
+          read_msg->addr_, read_msg->nb_);
 
       break;
     case MB_REGISTER_INPUT_REGISTERS:
-      rc = ModbusReadInputRegisters(manager, read_msg->slave_id_,
+      rc = ModbusReadInputRegisters(read_msg->master_id_, read_msg->slave_id_,
           read_msg->addr_, read_msg->nb_);
       
       break;
@@ -431,8 +499,11 @@ int PLCTask::ModbusRead(NMLmsg *cmd) {
 
 #define MODBUS_MANAGER_RW(modbus_func) \
   int ret = 0; \
-  ModbusStation *station = manager->GetStation(slave_id); \
+  ModbusStation *station = modbus_manager_.GetStation(master_id); \
   if (station) { \
+    if (station->SlaveId() != slave_id) { \
+      station->SetSlaveId(slave_id); \
+    } \
     ret = station->modbus_func(addr, nb, tab_rp_regs); \
     if (ret > 0) { \
       reply_nb = ret; \
@@ -446,16 +517,14 @@ int PLCTask::ModbusRead(NMLmsg *cmd) {
   } \
   return ret;
 
-int PLCTask::ModbusReadBits(ModbusManager *manager, int slave_id,
-    int addr, int nb) {
-
+int PlcTask::ModbusReadBits(int master_id, int slave_id, int addr, int nb) {
   uint8_t *tab_rp_regs = (uint8_t *)(plc_status_->modbus_bits);
   int &reply_nb = plc_status_->modbus_bits_length ;
 
   MODBUS_MANAGER_RW(ReadBits);
 }
 
-int PLCTask::ModbusReadInputBits(ModbusManager *manager, int slave_id,
+int PlcTask::ModbusReadInputBits(int master_id, int slave_id,
     int addr, int nb) {
 
   uint8_t *tab_rp_regs = (uint8_t *)(plc_status_->modbus_input_bits);
@@ -464,7 +533,7 @@ int PLCTask::ModbusReadInputBits(ModbusManager *manager, int slave_id,
   MODBUS_MANAGER_RW(ReadInputBits)
 }
 
-int PLCTask::ModbusReadRegisters(ModbusManager *manager, int slave_id,
+int PlcTask::ModbusReadRegisters(int master_id, int slave_id,
     int addr, int nb) {
 
   uint16_t *tab_rp_regs = \
@@ -475,7 +544,7 @@ int PLCTask::ModbusReadRegisters(ModbusManager *manager, int slave_id,
   MODBUS_MANAGER_RW(ReadRegisters)
 }
 
-int PLCTask::ModbusReadInputRegisters(ModbusManager *manager, int slave_id,
+int PlcTask::ModbusReadInputRegisters(int master_id, int slave_id,
     int addr, int nb) {
 
   uint16_t *tab_rp_regs = \
@@ -486,7 +555,7 @@ int PLCTask::ModbusReadInputRegisters(ModbusManager *manager, int slave_id,
   MODBUS_MANAGER_RW(ReadInputRegisters)
 }
 
-int PLCTask::ModbusWriteBits(ModbusManager *manager, int slave_id,
+int PlcTask::ModbusWriteBits(int master_id, int slave_id,
     int addr, int nb, const unsigned char *src) {
 
   uint8_t *tab_rp_regs = (uint8_t *)src;
@@ -495,7 +564,7 @@ int PLCTask::ModbusWriteBits(ModbusManager *manager, int slave_id,
   MODBUS_MANAGER_RW(WriteBits)
 }
 
-int PLCTask::ModbusWriteRegisters(ModbusManager *manager, int slave_id,
+int PlcTask::ModbusWriteRegisters(int master_id, int slave_id,
     int addr, int nb, const unsigned short *src) {
 
   uint16_t *tab_rp_regs = (uint16_t *)src;
@@ -504,12 +573,15 @@ int PLCTask::ModbusWriteRegisters(ModbusManager *manager, int slave_id,
   MODBUS_MANAGER_RW(WriteRegisters)
 }
 
-int PLCTask::ModbusWriteBit(ModbusManager *manager, int slave_id,
+int PlcTask::ModbusWriteBit(int master_id, int slave_id,
     int addr, int status) {
 
   int ret = 0;
-  ModbusStation *station = manager->GetStation(slave_id);
+  ModbusStation *station = modbus_manager_.GetStation(slave_id);
   if (station) {
+    if (station->SlaveId() != slave_id) {
+      station->SetSlaveId(slave_id);
+    }
     ret = station->WriteBit(addr, status);
     if (ret < 0) {
       memset(error_, 0, NML_ERROR_LEN);
@@ -522,12 +594,15 @@ int PLCTask::ModbusWriteBit(ModbusManager *manager, int slave_id,
   return ret;
 }
 
-int PLCTask::ModbusWriteRegister(ModbusManager *manager, int slave_id,
+int PlcTask::ModbusWriteRegister(int master_id, int slave_id,
     int addr, int value) {
  
   int ret = 0;
-  ModbusStation *station = manager->GetStation(slave_id);
+  ModbusStation *station = modbus_manager_.GetStation(slave_id);
   if (station) {
+    if (station->SlaveId() != slave_id) {
+      station->SetSlaveId(slave_id);
+    }
     ret = station->WriteRegister(addr, value);
     if (ret < 0) {
       memset(error_, 0, NML_ERROR_LEN);
@@ -540,32 +615,28 @@ int PLCTask::ModbusWriteRegister(ModbusManager *manager, int slave_id,
   return ret;
 }
 
-int PLCTask::ModbusWrite(NMLmsg *cmd) {
+int PlcTask::ModbusWrite(NMLmsg *cmd) {
   MODBUS_WRITE_MSG *write_msg = (MODBUS_WRITE_MSG *)cmd;
-  ModbusManager *manager = GetModbusMaster(write_msg->master_id_);
-  if (!manager) {
-    return 0;
-  }
   int rc = 0;
   switch (write_msg->type_) {
     case MB_REGISTER_BITS:
       if (write_msg->nb_ == 1) {
-        rc = ModbusWriteBit(manager, write_msg->slave_id_,
+        rc = ModbusWriteBit(write_msg->master_id_, write_msg->slave_id_,
             write_msg->addr_, write_msg->bits[0]);
 
       } else {
-        rc = ModbusWriteBits(manager, write_msg->slave_id_,
+        rc = ModbusWriteBits(write_msg->master_id_, write_msg->slave_id_,
             write_msg->addr_, write_msg->nb_, write_msg->bits);
 
       }
       break;
     case MB_REGISTER_REGISTERS:
       if (write_msg->nb_ == 1) {
-        rc = ModbusWriteRegister(manager, write_msg->slave_id_,
+        rc = ModbusWriteRegister(write_msg->master_id_, write_msg->slave_id_,
             write_msg->addr_, write_msg->registers[0]);
 
       } else {
-        rc = ModbusWriteRegisters(manager, write_msg->slave_id_,
+        rc = ModbusWriteRegisters(write_msg->master_id_, write_msg->slave_id_,
             write_msg->addr_, write_msg->nb_, write_msg->registers);
 
       }
@@ -574,4 +645,82 @@ int PLCTask::ModbusWrite(NMLmsg *cmd) {
       break;
   }
   return rc;
+}
+
+int PlcTask::OpenGas(int gas_id) {
+  gas_.Open(gas_id);
+  return 0;
+}
+
+int PlcTask::OpenCuttingGas(int level) {
+  gas_delay_ = false;
+  int ret = gas_.Open(plc_cfg_[current_layer_].gas_cfg_.gas_[level]);
+  if (ret < 0) {
+    return -1;
+  } else {
+    if (ret == GAS_OPEN_FIRST_DELAY) {
+      gas_delay_ = true;
+      delay_timeout_ = etime() + plc_global_cfg_.open_gas_delay_;
+    } else if (ret == GAS_OPEN_SWITCH_DELAY) {
+      gas_delay_ = true;
+      delay_timeout_ = etime() + plc_global_cfg_.switch_gas_delay_;
+    }
+  }
+  return 0;
+}
+
+int PlcTask::SetCuttingPressure(int level) {
+  return gas_.SetPressure(plc_cfg_[current_layer_].gas_cfg_.gas_[level],
+      plc_cfg_[current_layer_].gas_cfg_.pressure_[level]);
+
+}
+
+int PlcTask::CuttingStay(int level) {
+  delay_timeout_ = etime() + plc_cfg_[current_layer_].delay_cfg_.stay_[level];
+  return 0;
+}
+
+int PlcTask::CuttingBlow(int level) {
+  if (plc_cfg_[current_layer_].delay_cfg_.blow_enable_[level]) {
+    delay_timeout_ = etime() + \
+        plc_cfg_[current_layer_].delay_cfg_.laser_off_blow_time_[level];
+
+  }
+  return 0;
+}
+
+int PlcTask::LaserOn() {
+  return laser_.LaserOn();
+}
+
+int PlcTask::LaserOff() {
+  return laser_.LaserOn();
+}
+
+int PlcTask::ShutterOn() {
+  return laser_.ShutterOn();
+}
+
+int PlcTask::ShutterOff() {
+  return laser_.ShutterOff();
+}
+
+int PlcTask::SetCuttingPower(int level) {
+  return laser_.SetPower(\
+      plc_cfg_[current_layer_].laser_cfg_.peak_power_[level]);
+
+}
+
+int PlcTask::SetCuttingDutyRation(int level) {
+  return laser_.SetDutyRatio(\
+      plc_cfg_[current_layer_].laser_cfg_.duty_ratio_[level]);
+}
+
+int PlcTask::SetCuttingPulseFrequency(int level) {
+  return laser_.SetPulseFrequency(\
+      plc_cfg_[current_layer_].laser_cfg_.pulse_frequency_[level]);
+}
+
+int PlcTask::SetCuttingLaserType(int level) {
+  return laser_.SetType(plc_cfg_[current_layer_].laser_cfg_.type_[level]);
 }

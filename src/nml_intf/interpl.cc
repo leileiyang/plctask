@@ -22,7 +22,7 @@
 #include <linklist.hh>
 #include <nmlmsg.hh>            /* class NMLmsg */
 #include <rcs_prnt.hh>
-#include "interpl.hh"	// these decls
+#include "interpl.h"	// these decls
 
 //NML_INTERP_LIST interp_list;	/* NML Union, for interpreter */
 

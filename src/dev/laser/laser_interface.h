@@ -1,0 +1,17 @@
+#ifndef DEV_LASER_INTERFACE_H_
+#define DEV_LASER_INTERFACE_H_
+
+class LaserInterface {
+ public:
+  virtual int LaserOn() = 0;
+  virtual int LaserOff() = 0;
+  virtual int ShutterOn() = 0;
+  virtual int ShutterOff() = 0;
+  virtual int SetPower(double power) = 0;
+  virtual int SetDutyRatio(double duty_ratio) = 0;
+  virtual int SetPulseFrequency(double pulse_frequency) = 0;
+  virtual int SetType(int type) = 0;
+  
+};
+
+#endif

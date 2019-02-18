@@ -3,13 +3,13 @@
 
 #include <map>
 
-#include "job/plcjob.hh"
-#include "nml_intf/plc_nml.hh"
+#include "job/plcjob.h"
 
 class JobManager {
  public:
   ~JobManager();
   int AppendCommand(NMLmsg *msg);
+  int ParsePlcJob(NMLmsg *msg);
   PlcJob* GetPlcJob(int job_id);
  private:
   std::map<int, PlcJob *> jobs_;
