@@ -1,7 +1,19 @@
 cmake_minimum_required (VERSION 2.6)
 
-file (GLOB NML_SOURCES
-    "*.hh"
-    "*.cc")
+add_custom_command (
+  OUTPUT
+    ${PROJECT_SOURCE_DIR}/nml_intf/plc_nml.cc
+  COMMAND java
+    ARGS -jar ${PROJECT_SOURCE_DIR}/nml_intf/CodeGenCmdLine.jar update_with_name=true
+    ${PROJECT_SOURCE_DIR}/nml_intf/plc_nml.h -o ${PROJECT_SOURCE_DIR}/nml_intf/plc_nml.cc
+  DEPENDS plc.h plc_nml.h
+  VERBATIM
+  )
 
-add_library(plcmsg SHARED ${NML_SOURCES})
+add_custom_target (
+  generate-msg-cc
+  DEPENDS ${PROJECT_SOURCE_DIR}/nml_intf/plc_nml.cc
+  )
+
+add_library(plcmsg SHARED interpl.cc plc_nml.cc)
+add_dependencies (plcmsg generate-msg-cc)
