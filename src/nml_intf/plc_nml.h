@@ -27,6 +27,15 @@ enum MB_BACKEND_TYPE {
   MB_BACKEND_RTU,
 };
 
+class PLC_GAS_STAT {
+ public:
+  int status_;
+  int current_gas_;
+  double current_pressure_;
+  unsigned short gas_status_;
+  unsigned short alarm_status_;
+};
+
 class PLC_STAT_MSG: public RCS_STAT_MSG {
  public:
   PLC_STAT_MSG(NMLTYPE t, size_t s): RCS_STAT_MSG(t, s) {};

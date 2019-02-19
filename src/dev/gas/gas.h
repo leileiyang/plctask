@@ -1,39 +1,54 @@
 #ifndef DEV_GAS_GAS_H_
 #define DEV_GAS_GAS_H_
 
-#include <string>
+#include <map>
 
-#include "gas_interface.h"
+#include "gas_intf.h"
 
-enum GAS_OPEN_DELAY_TYPE {
-  GAS_OPEN_NO_DELAY = 0,
-  GAS_OPEN_FIRST_DELAY,
-  GAS_OPEN_SWITCH_DELAY,
-};
-
-class IoDevice;
+class PLC_GAS_STAT;
 
 class Gas {
  public:
-  Gas();
-  ~Gas();
+  Gas(): status_(RCS_DONE), enable_(true), gas_intf_(NULL), intf_type_(-1),
+      current_gas_(-1), current_pressure(0.),
+      gas_status_(0), alarm_status_(0) {}
+
+  ~Gas() {
+    if (gas_intf_) {
+      delete gas_intf_;
+    }
+  }
+
   int Open(int gas_id);
-  int Close(int gas_id);
+  int Close();
   int SetPressure(int gas_id, double pressure);
 
-  // Before using the gas device, you must connect a
-  // gas interface class instances first.
-  int ConnectInterface(GasInterface *gas_intf);
-  int ConnectIoDevice(IoDevice* io_dev);
-  void Update();
+  void UpdateCfg();
+  void UpdateStatus(PLC_GAS_STAT &gas_stat);
 
-  static std::map<int, GasItem> gas_items;
-  static std::map<int, GasItem> CreateGasItems();
+  void SetEnable(bool enable) {
+    enable_ = enable;
+  }
+  void SetIntf(GasIntf *gas_intf, int intf_type) {
+    gas_intf_ = gas_intf;
+    intf_type_ = intf_type;
+  }
+
+  int status_;
+  bool enable_;
 
  private:
-  GasInterface *gas_intf_;
-  int working_gas_;
+  GasIntf* gas_intf_;
+  int intf_type_;
 
+  int current_gas_;
+  double current_pressure_;
+  unsigned short gas_status_;
+  unsigned short alarm_status_;
+
+  void SetGasStatus(int gas_id, int on);
+
+  static std::map<int, int> gas_id_pos_map;
 };
 
 #endif

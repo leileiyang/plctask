@@ -1,7 +1,7 @@
 #ifndef DEV_GAS_IOGAS_H_
 #define DEV_GAS_IOGAS_H_
 
-#include "gas_interface.h"
+#include "gas_intf.h"
 
 class IoDevice;
 

@@ -1,96 +1,96 @@
 #include "gas.h"
-#include "gas_interface.h"
+
 #include "io_gas.h"
-#include "plccfg.h"
+#include "../../nml_intf/plc_nml.h"
 
-#ifdef NML_OLC_COMPAT
-#include <rcs_print.hh>
-#else
-#include <rcs_prnt.hh>
-#endif
-
-typedef std::pair<int, std::string> pair_t;
-
-std::map<int, GasItem> Gas::gas_items = Gas::CreateGasItems();
-
-static const pair_t gas_pairs[] = {
-  pair_t(GAS_AIR, "Air"),
-  pair_t(GAS_O2, "Oxygen"),
-  pair_t(GAS_N2, "Nitrogen"),
-  pair_t(GAS_HIGH_AIR, "HighAir"),
-  pair_t(GAS_HIGH_O2, "HighOxygen"),
-  pair_t(GAS_HIGH_N2, "HighNitrogen"),
+enum GAS_ID_ENUM {
+  GAS_ID_AIR,
+  GAS_ID_OXYGEN,
+  GAS_ID_NITROGEN,
+  GAS_ID_HIGH_AIR,
+  GAS_ID_HIGH_OXYGEN,
+  GAS_ID_HIGH_NITROGEN,
 };
 
-std::map<int, GasItem> Gas::CreateGasItems() {
-  std::map<int, GasItem> items;
-  int size = sizeof(gas_pairs) / sizeof(gas_pairs[0]);
-  GasItem item = {0, "Gas", 10, 0}; 
-  for (int i = 0; i < size; i++) {
-    item.id = gas_pairs[i].first;
-    item.name = gas_pairs[i].second;
-    items[item.id] = item;
+typedef std::pair<int, int> pair_t;
+
+static const pair_t gas_array[] = {
+  pair_t(GAS_ID_AIR, 0),
+  pair_t(GAS_ID_OXYGEN, 1),
+  pair_t(GAS_ID_NITROGEN, 2),
+  pair_t(GAS_ID_HIGH_AIR, 3),
+  pair_t(GAS_ID_HIGH_OXYGEN, 4),
+  pair_t(GAS_ID_HIGH_NITROGEN, 5),
+};
+
+std::map<int, int> gas_id_pos_map(gas_array,
+    gas_array + sizeof(gas_array) / sizeof(gas_array[0]));
+
+int Gas::Open(int gas_id) {
+  if (!enable_) {
+    return GAS_OP_OK;
   }
-  return items;
-}
-
-Gas::Gas(): gas_intf_(NULL), working_gas_(-1) {}
-
-Gas::~Gas() {
-  delete gas_intf_;
-}
-
-int Gas::ConnectInterface(GasInterface *gas_intf) {
-  if (gas_intf) {
-    gas_intf_ = gas_intf;
-    return 0;
+  int ret = gas_intf_->Open(gas_id);
+  if (ret) {
+    ;
   } else {
-    return -1;
+    if (current_gas_ < 0) {
+      ret = GAS_OPEN_FIRST_DELAY;
+    } else if (current_gas_ != gas_id) {
+      ret = GAS_OPEN_SWITCH_DELAY;
+    }
+    current_gas_ = gas_id;
+    SetGasStatus(gas_id, 1);
   }
+  return ret; 
 }
 
-int Gas::ConnectIoDevice(IoDevice* io_dev) {
-  gas_intf_ = new IoGas(io_dev);
+int Gas::Close() {
+  if (!enable_) {
+    return 0;
+  }
+  gas_intf_->Close();
+  SetGasStatus(current_gas_, 0);
   return 0;
 }
 
-int Gas::Open(int gas_id) {
-  if (gas_intf_->Open(gas_id)) {
-    rcs_print("Gas Open %s\n", gas_items[gas_id].name.c_str());
-    gas_items[gas_id].state = 1;
-    int ret = GAS_OPEN_NO_DELAY;
-    if (working_gas_ < 0) {
-      ret = GAS_OPEN_FIRST_DELAY;
-    } else if (working_gas_ != gas_id) {
-      ret = GAS_OPEN_SWITCH_DELAY;
-    }
-    working_gas_ = gas_id;
-    return ret; 
-  } else {
-    return -1;
-  }
-}
-
-int Gas::Close(int gas_id) {
-  if (gas_intf_->Close(gas_id)) {
-    rcs_print("Gas Cloase %s\n", gas_items[gas_id].name.c_str());
-    gas_items[gas_id].state = 0;
-    return 0; 
-  } else {
-    return -1;
-  }
-}
-
 int Gas::SetPressure(int gas_id, double pressure) {
-  if (gas_intf_->SetPressure(gas_id, pressure)) {
-    gas_items[gas_id].pressure = pressure;
-    rcs_print("Set %s Pressure %f\n", gas_items[gas_id].name.c_str(), pressure);
-    return 0; 
+  if (!enable_) {
+    return 0;
+  }
+  int ret = gas_intf_->SetPressure(gas_id, pressure);
+  if (ret) {
+    ;
   } else {
-    return -1;
+    current_pressure_ = pressure;
+    current_gas_ = gas_id;
+  }
+  return ret;
+}
+
+void Gas::UpdateCfg() {
+  switch (intf_type_) {
+    case GAS_INTF_IO:
+      break;
+    case GAS_INTF_MODBUS:
+      break;
+    default:
+      break;
   }
 }
 
-void Gas::Update() {
-  gas_intf_->Update(gas_items);
+void Gas::UpdateStatus(PLC_GAS_STAT &gas_stat) {
+  gas_stat.current_gas_ = current_gas_;
+  gas_stat.current_pressure_ = current_pressure_;
+  gas_stat.gas_status_ = gas_status_;
+  gas_stat.status_ = status_;
+  gas_stat.alarm_status_ = alarm_status_;
+}
+
+void Gas::SetGasStatus(int gas_id, int on) {
+  if (on) {
+    gas_status_ |= 1UL << gas_id_pos_map[gas_id];
+  } else {
+    gas_status_ &= ~(1UL << gas_id_pos_map[gas_id]);
+  }
 }
