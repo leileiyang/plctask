@@ -2,15 +2,17 @@
 #define DEV_GAS_GAS_H_
 
 #include <map>
+#include <iostream>
 
 #include "gas_intf.h"
+#include "../dev.h"
 
 class PLC_GAS_STAT;
 
 class Gas {
  public:
-  Gas(): status_(RCS_DONE), enable_(true), gas_intf_(NULL), intf_type_(-1),
-      current_gas_(-1), current_pressure(0.),
+  Gas(): status_(PLC_DONE), enable_(true), gas_intf_(NULL), intf_type_(-1),
+      current_gas_(-1), current_pressure_(0.),
       gas_status_(0), alarm_status_(0) {}
 
   ~Gas() {
