@@ -7,6 +7,15 @@
 #include "gas_intf.h"
 #include "../dev.h"
 
+enum GAS_ID_ENUM {
+  GAS_AIR,
+  GAS_O2,
+  GAS_N2,
+  GAS_HIGH_AIR,
+  GAS_HIGH_O2,
+  GAS_HIGH_N2,
+};
+
 class PLC_GAS_STAT;
 
 class Gas {

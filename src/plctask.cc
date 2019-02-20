@@ -32,7 +32,6 @@ PlcTask::PlcTask(double sleep_time):
     delay_left_(0.) {
     
   memset(error_, 0, NML_ERROR_LEN);
-  gas_.ConnectIoDevice(&out_dev_);
   laser_.ConnectIoDevice(&out_dev_);
 }
 

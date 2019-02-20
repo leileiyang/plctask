@@ -112,12 +112,12 @@ enum PLC_CMD_ENUM {
   GAS_N2_ALARM = 304,
 
   // Gas function id
-  GAS_AIR = 400,
-  GAS_O2 = 401,
-  GAS_N2 = 402,
-  GAS_HIGH_AIR = 403,
-  GAS_HIGH_O2 = 404,
-  GAS_HIGH_N2 = 405,
+  //GAS_AIR = 400,
+  //GAS_O2 = 401,
+  //GAS_N2 = 402,
+  //GAS_HIGH_AIR = 403,
+  //GAS_HIGH_O2 = 404,
+  //GAS_HIGH_N2 = 405,
 
   // Laser function id
   LASER_SWITCH = 420,

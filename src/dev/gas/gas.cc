@@ -3,27 +3,18 @@
 #include "io_gas.h"
 #include "../../nml_intf/plc_nml.h"
 
-enum GAS_ID_ENUM {
-  GAS_ID_AIR,
-  GAS_ID_OXYGEN,
-  GAS_ID_NITROGEN,
-  GAS_ID_HIGH_AIR,
-  GAS_ID_HIGH_OXYGEN,
-  GAS_ID_HIGH_NITROGEN,
-};
-
 typedef std::pair<int, int> pair_t;
 
 static const pair_t gas_array[] = {
-  pair_t(GAS_ID_AIR, 0),
-  pair_t(GAS_ID_OXYGEN, 1),
-  pair_t(GAS_ID_NITROGEN, 2),
-  pair_t(GAS_ID_HIGH_AIR, 3),
-  pair_t(GAS_ID_HIGH_OXYGEN, 4),
-  pair_t(GAS_ID_HIGH_NITROGEN, 5),
+  pair_t(GAS_AIR, 0),
+  pair_t(GAS_O2, 1),
+  pair_t(GAS_N2, 2),
+  pair_t(GAS_HIGH_AIR, 3),
+  pair_t(GAS_HIGH_O2, 4),
+  pair_t(GAS_HIGH_N2, 5),
 };
 
-std::map<int, int> gas_id_pos_map(gas_array,
+std::map<int, int> Gas::gas_id_pos_map(gas_array,
     gas_array + sizeof(gas_array) / sizeof(gas_array[0]));
 
 int Gas::Open(int gas_id) {
