@@ -3,12 +3,8 @@
 #include <rcs_prnt.hh>
 
 #include "io_laser.h"
-#include "dev/gpio/io_device.h"
 
-int Laser::ConnectIoDevice(IoDevice *io_dev) {
-  laser_intf_ = new IoLaser(io_dev);
-  return 0;
-}
+#include "laser_intf.h"
 
 int Laser::LaserOn() {
   rcs_print("LaserOn\n");

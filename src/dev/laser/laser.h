@@ -1,8 +1,7 @@
 #ifndef DEV_LASER_LASER_H
 #define DEV_LASER_LASER_H
 
-class LaserInterface;
-class IoDevice;
+class LaserIntf;
 
 class Laser {
  public:
@@ -14,14 +13,14 @@ class Laser {
   int SetDutyRatio(double duty_ratio);
   int SetPulseFrequency(double pulse_frequency);
   int SetType(int type);
-  int ConnectInterface(LaserInterface *laser_intf) {
+  void SetIntf(LaserIntf* laser_intf, int intf_type) {
     laser_intf_ = laser_intf;
-    return 0;
+    intf_type_ = intf_type;
   }
-  int ConnectIoDevice(IoDevice *io_dev);
 
  private:
-  LaserInterface *laser_intf_;
+  LaserIntf *laser_intf_;
+  int intf_type_;
 
 };
 

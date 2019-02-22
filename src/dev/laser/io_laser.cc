@@ -1,22 +1,24 @@
 #include "io_laser.h"
 
-#include "plccfg.h"
-
-#include "dev/gpio/io_device.h"
+#include "../gpio/io_device.h"
 
 int IoLaser::LaserOn() {
-  return io_dev_->Open(LASER_SWITCH);
+  //return io_dev_->Open(LASER_SWITCH);
+  return 0;
 }
 
 int IoLaser::LaserOff() {
-  return io_dev_->Close(LASER_SWITCH);
+  //return io_dev_->Close(LASER_SWITCH);
+  return 0;
 }
 
 int IoLaser::ShutterOn() {
-  return io_dev_->Open(LASER_SHUTTER);
+  //return io_dev_->Open(LASER_SHUTTER);
+  return 0;
 }
 int IoLaser::ShutterOff() {
-  return io_dev_->Close(LASER_SHUTTER);
+  //return io_dev_->Close(LASER_SHUTTER);
+  return 0;
 }
 
 int IoLaser::SetPower(double power) {

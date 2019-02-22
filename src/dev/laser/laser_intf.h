@@ -1,7 +1,7 @@
-#ifndef DEV_LASER_INTERFACE_H_
-#define DEV_LASER_INTERFACE_H_
+#ifndef DEV_LASER_INTF_H_
+#define DEV_LASER_INTF_H_
 
-class LaserInterface {
+class LaserIntf {
  public:
   virtual int LaserOn() = 0;
   virtual int LaserOff() = 0;

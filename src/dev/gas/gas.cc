@@ -65,6 +65,7 @@ void Gas::UpdateCfg() {
       break;
     case GAS_INTF_MODBUS:
       break;
+    case GAS_INTF_DEMO:
     default:
       break;
   }

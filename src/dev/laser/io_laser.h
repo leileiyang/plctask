@@ -1,11 +1,11 @@
 #ifndef DEV_LASER_IO_LASER_H_
 #define DEV_LASER_IO_LASER_H_
 
-#include "laser_interface.h"
+#include "laser_intf.h"
 
 class IoDevice;
 
-class IoLaser: public LaserInterface {
+class IoLaser: public LaserIntf {
  public:
   IoLaser(IoDevice *io_dev): io_dev_(io_dev) {}
 

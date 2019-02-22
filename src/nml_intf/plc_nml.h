@@ -140,109 +140,129 @@ class JOB_ABORT_MSG: public PLC_CMD_MSG {
   void update(CMS *cms);
 };
 
-class OPEN_GAS: public PLC_CMD_MSG {
+class GAS_OPEN: public PLC_CMD_MSG {
  public:
-  OPEN_GAS();
+  GAS_OPEN();
   void update(CMS *cms);
 
   int gas_id_;
 };
 
-class OPEN_CUTTING_GAS: public PLC_CMD_MSG {
+class GAS_OPEN_AUTO: public PLC_CMD_MSG {
  public:
-  OPEN_CUTTING_GAS();
+  GAS_OPEN_AUTO();
   void update(CMS *cms);
 
   int level_;
 };
 
-class SET_CUTTING_PRESSURE: public PLC_CMD_MSG {
+class GAS_PRESSURE_AUTO: public PLC_CMD_MSG {
  public:
-  SET_CUTTING_PRESSURE();
+  GAS_PRESSURE_AUTO();
   void update(CMS *cms);
 
   int level_;
 };
+
+
 
 class LHC_FOLLOW: public PLC_CMD_MSG {
  public:
   LHC_FOLLOW();
   void update(CMS *cms);
 
-  int level_;
+  double height_;
 };
 
-class LHC_PROGRESSIVE_FOLLOW: public PLC_CMD_MSG {
+class LHC_FOLLOW_AUTO: public PLC_CMD_MSG {
  public:
-  LHC_PROGRESSIVE_FOLLOW();
+  LHC_FOLLOW_AUTO();
   void update(CMS *cms);
 
   int level_;
 };
 
-class LHC_LIFT_CMD: public PLC_CMD_MSG {
+class LHC_INCR_FOLLOW_AUTO: public PLC_CMD_MSG {
  public:
-  LHC_LIFT_CMD();
-  void update(CMS *cms);
-};
-
-class LHC_Z_AXIS_HOLD_CMD: public PLC_CMD_MSG {
- public:
-  LHC_Z_AXIS_HOLD_CMD();
-  void update(CMS *cms);
-};
-
-class LASER_ON_CMD: public PLC_CMD_MSG {
- public:
-  LASER_ON_CMD();
-  void update(CMS *cms);
-};
-
-class LASER_OFF_CMD: public PLC_CMD_MSG {
- public:
-  LASER_OFF_CMD();
-  void update(CMS *cms);
-};
-
-class LASER_SHUTTER_ON_CMD: public PLC_CMD_MSG {
- public:
-  LASER_SHUTTER_ON_CMD();
-  void update(CMS *cms);
-};
-
-class LASER_SHUTTER_OFF_CMD: public PLC_CMD_MSG {
- public:
-  LASER_SHUTTER_OFF_CMD();
-  void update(CMS *cms);
-};
-
-class LASER_POWER: public PLC_CMD_MSG {
- public:
-  LASER_POWER();
+  LHC_INCR_FOLLOW_AUTO();
   void update(CMS *cms);
 
   int level_;
 };
 
-class LASER_DUTYRATIO: public PLC_CMD_MSG {
+class LHC_LIFT_AUTO: public PLC_CMD_MSG {
  public:
-  LASER_DUTYRATIO();
+  LHC_LIFT_AUTO();
+  void update(CMS *cms);
+};
+
+class LHC_AXIS_HOLD: public PLC_CMD_MSG {
+ public:
+  LHC_AXIS_HOLD();
+  void update(CMS *cms);
+};
+
+class LASER_ON_MANUAL: public PLC_CMD_MSG {
+ public:
+  LASER_ON_MANUAL();
+  void update(CMS *cms);
+  double power_;
+  double duty_ratio_;
+  double frequency_;
+  double duration_;
+};
+
+class LASER_ON: public PLC_CMD_MSG {
+ public:
+  LASER_ON();
+  void update(CMS *cms);
+};
+
+class LASER_OFF: public PLC_CMD_MSG {
+ public:
+  LASER_OFF();
+  void update(CMS *cms);
+};
+
+class LASER_SHUTTER_ON: public PLC_CMD_MSG {
+ public:
+  LASER_SHUTTER_ON();
+  void update(CMS *cms);
+};
+
+class LASER_SHUTTER_OFF: public PLC_CMD_MSG {
+ public:
+  LASER_SHUTTER_OFF();
+  void update(CMS *cms);
+};
+
+class LASER_POWER_AUTO: public PLC_CMD_MSG {
+ public:
+  LASER_POWER_AUTO();
   void update(CMS *cms);
 
   int level_;
 };
 
-class LASER_PULSE_FREQUENCY: public PLC_CMD_MSG {
+class LASER_DUTYRATIO_AUTO: public PLC_CMD_MSG {
  public:
-  LASER_PULSE_FREQUENCY();
+  LASER_DUTYRATIO_AUTO();
   void update(CMS *cms);
 
   int level_;
 };
 
-class LASER_TYPE: public PLC_CMD_MSG {
+class LASER_PULSE_FREQ_AUTO: public PLC_CMD_MSG {
  public:
-  LASER_TYPE();
+  LASER_PULSE_FREQ_AUTO();
+  void update(CMS *cms);
+
+  int level_;
+};
+
+class LASER_TYPE_AUTO: public PLC_CMD_MSG {
+ public:
+  LASER_TYPE_AUTO();
   void update(CMS *cms);
 
   int level_;
@@ -258,25 +278,25 @@ class IO_CFG_MSG: public PLC_CMD_MSG {
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(short, func_id, IO_PORT_SIZE)
 };
 
-class CUTTING_DELAY_BLOW: public PLC_CMD_MSG {
+class DELAY_BLOW_AUTO: public PLC_CMD_MSG {
  public:
-  CUTTING_DELAY_BLOW();
+  DELAY_BLOW_AUTO();
   void update(CMS *cms);
 
   int level_;
 };
 
-class CUTTING_DELAY_STAY: public PLC_CMD_MSG {
+class DELAY_STAY_AUTO: public PLC_CMD_MSG {
  public:
-  CUTTING_DELAY_STAY();
+  DELAY_STAY_AUTO();
   void update(CMS *cms);
 
   int level_;
 };
 
-class FOCUS_POSITION: public PLC_CMD_MSG {
+class FOCUS_POSITION_AUTO: public PLC_CMD_MSG {
  public:
-  FOCUS_POSITION();
+  FOCUS_POSITION_AUTO();
   void update(CMS *cms);
 
   int level_;

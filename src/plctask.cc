@@ -32,7 +32,6 @@ PlcTask::PlcTask(double sleep_time):
     delay_left_(0.) {
     
   memset(error_, 0, NML_ERROR_LEN);
-  laser_.ConnectIoDevice(&out_dev_);
 }
 
 PlcTask::~PlcTask() {
@@ -242,44 +241,44 @@ int PlcTask::TaskIssueCommand(NMLmsg *cmd) {
         retval = -1;
       }
       break;
-    case OPEN_GAS_TYPE:
-      retval = OpenGas(((OPEN_GAS *)cmd)->gas_id_);
+    case GAS_OPEN_TYPE:
+      retval = OpenGas(((GAS_OPEN *)cmd)->gas_id_);
       break;
-    case OPEN_CUTTING_GAS_TYPE:
-      retval = OpenCuttingGas(((OPEN_CUTTING_GAS *)cmd)->level_);
+    case GAS_OPEN_AUTO_TYPE:
+      retval = OpenCuttingGas(((GAS_OPEN_AUTO *)cmd)->level_);
       break;
-    case SET_CUTTING_PRESSURE_TYPE:
-      retval = SetCuttingPressure(((SET_CUTTING_PRESSURE *)cmd)->level_);
+    case GAS_PRESSURE_AUTO_TYPE:
+      retval = SetCuttingPressure(((GAS_PRESSURE_AUTO *)cmd)->level_);
       break;
-    case CUTTING_DELAY_BLOW_TYPE:
-      retval = CuttingBlow(((CUTTING_DELAY_BLOW *)cmd)->level_);
+    case DELAY_BLOW_AUTO_TYPE:
+      retval = CuttingBlow(((DELAY_BLOW_AUTO *)cmd)->level_);
       break;
-    case CUTTING_DELAY_STAY_TYPE:
-      retval = CuttingStay(((CUTTING_DELAY_STAY *)cmd)->level_);
+    case DELAY_STAY_AUTO_TYPE:
+      retval = CuttingStay(((DELAY_STAY_AUTO *)cmd)->level_);
       break;
-    case LASER_ON_CMD_TYPE:
+    case LASER_ON_TYPE:
       retval = LaserOn();
       break;
-    case LASER_OFF_CMD_TYPE:
+    case LASER_OFF_TYPE:
       retval = LaserOff();
       break;
-    case LASER_SHUTTER_ON_CMD_TYPE:
+    case LASER_SHUTTER_ON_TYPE:
       retval = ShutterOn();
       break;
-    case LASER_SHUTTER_OFF_CMD_TYPE:
+    case LASER_SHUTTER_OFF_TYPE:
       retval = ShutterOff();
       break;
-    case LASER_POWER_TYPE:
-      retval = SetCuttingPower(((LASER_POWER *)cmd)->level_);
+    case LASER_POWER_AUTO_TYPE:
+      retval = SetCuttingPower(((LASER_POWER_AUTO *)cmd)->level_);
       break;
-    case LASER_DUTYRATIO_TYPE:
-      retval = SetCuttingDutyRation(((LASER_DUTYRATIO *)cmd)->level_);
+    case LASER_DUTYRATIO_AUTO_TYPE:
+      retval = SetCuttingDutyRation(((LASER_DUTYRATIO_AUTO *)cmd)->level_);
       break;
-    case LASER_PULSE_FREQUENCY_TYPE:
-      retval = SetCuttingPulseFrequency(((LASER_PULSE_FREQUENCY *)cmd)->level_);
+    case LASER_PULSE_FREQ_AUTO_TYPE:
+      retval = SetCuttingPulseFrequency(((LASER_PULSE_FREQ_AUTO *)cmd)->level_);
       break;
-    case LASER_TYPE_TYPE:
-      retval = SetCuttingLaserType(((LASER_TYPE *)cmd)->level_);
+    case LASER_TYPE_AUTO_TYPE:
+      retval = SetCuttingLaserType(((LASER_TYPE_AUTO *)cmd)->level_);
       break;
     default:
       break;
@@ -317,7 +316,7 @@ int PlcTask::Plan() {
     // immediate command
     case PLC_EXEC_JOB_TYPE:
     case JOB_ABORT_MSG_TYPE:
-    case OPEN_GAS_TYPE:
+    case GAS_OPEN_TYPE:
     case MODBUS_INIT_MSG_TYPE:
     case MODBUS_READ_MSG_TYPE:
     case MODBUS_WRITE_MSG_TYPE:
@@ -393,10 +392,10 @@ int PlcTask::CheckPostconditions(NMLmsg *cmd) {
     return PLC_TASK_EXEC_DONE;
   }
   switch (cmd->type) {
-    case CUTTING_DELAY_STAY_TYPE:
+    case DELAY_STAY_AUTO_TYPE:
       return PLC_TASK_EXEC_WAITING_FOR_DELAY;
-    case CUTTING_DELAY_BLOW_TYPE: {
-      CUTTING_DELAY_BLOW *blow = (CUTTING_DELAY_BLOW *)cmd;
+    case DELAY_BLOW_AUTO_TYPE: {
+      DELAY_BLOW_AUTO *blow = (DELAY_BLOW_AUTO *)cmd;
       if (plc_cfg_[current_layer_].delay_cfg_.blow_enable_[blow->level_]) {
         return PLC_TASK_EXEC_WAITING_FOR_DELAY;
       } else {
@@ -404,7 +403,7 @@ int PlcTask::CheckPostconditions(NMLmsg *cmd) {
       }
                           }
       break;
-    case OPEN_CUTTING_GAS_TYPE:
+    case GAS_OPEN_AUTO_TYPE:
       if (gas_delay_) {
         return PLC_TASK_EXEC_WAITING_FOR_DELAY;
       } else {
