@@ -70,6 +70,13 @@ class PLC_CMD_MSG: public RCS_CMD_MSG {
   short exec_;
 };
 
+class PLC_TASK_INIT: public PLC_CMD_MSG {
+ public:
+  PLC_TASK_INIT();
+  
+  void update(CMS *cms);
+};
+
 class MODBUS_CMD_MSG: public PLC_CMD_MSG {
  public:
   MODBUS_CMD_MSG(NMLTYPE t, size_t s): PLC_CMD_MSG(t, s),

@@ -2,6 +2,7 @@
 #define NML_INTF_PLC_H_
 
 #define PLC_STAT_TYPE                    ((NMLTYPE) 101)
+#define PLC_TASK_INIT_TYPE               ((NMLTYPE) 102)
 #define FIRST_CMD_MSG_TYPE               ((NMLTYPE) 103)
 #define SECOND_CMD_MSG_TYPE              ((NMLTYPE) 104)
 #define MODBUS_CMD_MSG_TYPE              ((NMLTYPE) 107)
