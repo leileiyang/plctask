@@ -125,7 +125,7 @@ enum PLC_CMD_ENUM {
 
 };
 
-struct ProcessCfg {
+struct ProcessArgs {
   bool no_lift;
   bool keep_air;
   bool no_follow;
@@ -137,9 +137,9 @@ struct ProcessCfg {
   int craft_level;
 };
 
-class GasCfg {
+class GasArgs {
  public:
-  GasCfg(): gas_(CRAFT_LEVELS, 0), pressure_(CRAFT_LEVELS, 0.){}
+  GasArgs(): gas_(CRAFT_LEVELS, 0), pressure_(CRAFT_LEVELS, 0.){}
 
   std::vector<int> gas_;
   std::vector<double> pressure_;
@@ -150,9 +150,9 @@ class GasCfg {
   }
 };
 
-class LaserCfg {
+class LaserArgs {
  public:
-  LaserCfg(): peak_power_(CRAFT_LEVELS, 100), duty_ratio_(CRAFT_LEVELS, 100),
+  LaserArgs(): peak_power_(CRAFT_LEVELS, 100), duty_ratio_(CRAFT_LEVELS, 100),
       pulse_frequency_(CRAFT_LEVELS, 5000), type_(CRAFT_LEVELS, 0) {}
 
   std::vector<double> peak_power_;
@@ -171,9 +171,9 @@ class LaserCfg {
   }
 };
 
-class FollowerCfg {
+class FollowerArgs {
  public:
-  FollowerCfg(): height_(CRAFT_LEVELS, 0.), incr_enable_(CRAFT_LEVELS, false),
+  FollowerArgs(): height_(CRAFT_LEVELS, 0.), incr_enable_(CRAFT_LEVELS, false),
       incr_time_(CRAFT_LEVELS, 0.), lift_height_(0.), no_follow_(false) {}
 
   std::vector<double> height_;
@@ -192,9 +192,9 @@ class FollowerCfg {
   }
 };
 
-class FocusCfg {
+class FocusArgs {
  public:
-  FocusCfg(): position_(CRAFT_LEVELS, 0) {}
+  FocusArgs(): position_(CRAFT_LEVELS, 0) {}
 
   std::vector<double> position_;
   void Show() {
@@ -204,9 +204,9 @@ class FocusCfg {
   }
 };
 
-class DelayCfg {
+class DelayArgs {
  public:
-  DelayCfg(): stay_(CRAFT_LEVELS, 3000),
+  DelayArgs(): stay_(CRAFT_LEVELS, 3000),
       laser_off_blow_time_(CRAFT_LEVELS, 500),
       blow_enable_(CRAFT_LEVELS, false) {}
 
@@ -224,18 +224,18 @@ class DelayCfg {
   }
 };
 
-class PlcGlobalCfg {
+class PlcGlobalArgs {
  public:
   double open_gas_delay_;
   double switch_gas_delay_;
 };
 
-class PlcCfg {
+class PlcArgs {
  public:
-  ProcessCfg process_cfg_;
-  GasCfg gas_cfg_;
-  LaserCfg laser_cfg_;
-  DelayCfg delay_cfg_;
+  ProcessArgs process_args__;
+  GasArgs gas_args_;
+  LaserArgs laser_args_;
+  DelayArgs delay_args_;
 
 };
 

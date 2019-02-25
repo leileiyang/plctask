@@ -84,8 +84,8 @@ class PlcTask {
 
   IoDevice out_dev_;
   int current_layer_;
-  PlcGlobalCfg plc_global_cfg_;
-  std::vector<PlcCfg> plc_cfg_;
+  PlcGlobalArgs plc_global_args_;
+  std::vector<PlcArgs> plc_args_;
 
   Gas gas_;
   bool gas_delay_;

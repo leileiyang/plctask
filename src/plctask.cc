@@ -26,7 +26,7 @@ PlcTask::PlcTask(double sleep_time):
     execute_error_(0),
     task_eager_(0),
     current_layer_(0),
-    plc_cfg_(CRAFT_LAYERS, PlcCfg()),
+    plc_args_(CRAFT_LAYERS, PlcArgs()),
     gas_delay_(false),
     delay_timeout_(0.),
     delay_left_(0.) {
@@ -396,7 +396,7 @@ int PlcTask::CheckPostconditions(NMLmsg *cmd) {
       return PLC_TASK_EXEC_WAITING_FOR_DELAY;
     case DELAY_BLOW_AUTO_TYPE: {
       DELAY_BLOW_AUTO *blow = (DELAY_BLOW_AUTO *)cmd;
-      if (plc_cfg_[current_layer_].delay_cfg_.blow_enable_[blow->level_]) {
+      if (plc_args_[current_layer_].delay_args_.blow_enable_[blow->level_]) {
         return PLC_TASK_EXEC_WAITING_FOR_DELAY;
       } else {
         return PLC_TASK_EXEC_DONE;
@@ -652,37 +652,36 @@ int PlcTask::OpenGas(int gas_id) {
 
 int PlcTask::OpenCuttingGas(int level) {
   gas_delay_ = false;
-  int ret = gas_.Open(plc_cfg_[current_layer_].gas_cfg_.gas_[level]);
+  int ret = gas_.Open(plc_args_[current_layer_].gas_args_.gas_[level]);
   if (ret < 0) {
     return -1;
   } else {
     if (ret == GAS_OPEN_FIRST_DELAY) {
       gas_delay_ = true;
-      delay_timeout_ = etime() + plc_global_cfg_.open_gas_delay_;
+      delay_timeout_ = etime() + plc_global_args_.open_gas_delay_;
     } else if (ret == GAS_OPEN_SWITCH_DELAY) {
       gas_delay_ = true;
-      delay_timeout_ = etime() + plc_global_cfg_.switch_gas_delay_;
+      delay_timeout_ = etime() + plc_global_args_.switch_gas_delay_;
     }
   }
   return 0;
 }
 
 int PlcTask::SetCuttingPressure(int level) {
-  return gas_.SetPressure(plc_cfg_[current_layer_].gas_cfg_.gas_[level],
-      plc_cfg_[current_layer_].gas_cfg_.pressure_[level]);
+  return gas_.SetPressure(plc_args_[current_layer_].gas_args_.gas_[level],
+      plc_args_[current_layer_].gas_args_.pressure_[level]);
 
 }
 
 int PlcTask::CuttingStay(int level) {
-  delay_timeout_ = etime() + plc_cfg_[current_layer_].delay_cfg_.stay_[level];
+  delay_timeout_ = etime() + plc_args_[current_layer_].delay_args_.stay_[level];
   return 0;
 }
 
 int PlcTask::CuttingBlow(int level) {
-  if (plc_cfg_[current_layer_].delay_cfg_.blow_enable_[level]) {
+  if (plc_args_[current_layer_].delay_args_.blow_enable_[level]) {
     delay_timeout_ = etime() + \
-        plc_cfg_[current_layer_].delay_cfg_.laser_off_blow_time_[level];
-
+        plc_args_[current_layer_].delay_args_.laser_off_blow_time_[level];
   }
   return 0;
 }
@@ -705,20 +704,20 @@ int PlcTask::ShutterOff() {
 
 int PlcTask::SetCuttingPower(int level) {
   return laser_.SetPower(\
-      plc_cfg_[current_layer_].laser_cfg_.peak_power_[level]);
+      plc_args_[current_layer_].laser_args_.peak_power_[level]);
 
 }
 
 int PlcTask::SetCuttingDutyRation(int level) {
   return laser_.SetDutyRatio(\
-      plc_cfg_[current_layer_].laser_cfg_.duty_ratio_[level]);
+      plc_args_[current_layer_].laser_args_.duty_ratio_[level]);
 }
 
 int PlcTask::SetCuttingPulseFrequency(int level) {
   return laser_.SetPulseFrequency(\
-      plc_cfg_[current_layer_].laser_cfg_.pulse_frequency_[level]);
+      plc_args_[current_layer_].laser_args_.pulse_frequency_[level]);
 }
 
 int PlcTask::SetCuttingLaserType(int level) {
-  return laser_.SetType(plc_cfg_[current_layer_].laser_cfg_.type_[level]);
+  return laser_.SetType(plc_args_[current_layer_].laser_args_.type_[level]);
 }
