@@ -36,6 +36,16 @@ class PLC_GAS_STAT {
   unsigned short alarm_status_;
 };
 
+class PLC_LHC_STAT {
+ public:
+  double z_;
+  double h_;
+  double c_;
+  int status_;
+  int exec_state_;
+  unsigned int alarm_status_;
+};
+
 class PLC_STAT_MSG: public RCS_STAT_MSG {
  public:
   PLC_STAT_MSG(NMLTYPE t, size_t s): RCS_STAT_MSG(t, s) {};

@@ -1,21 +1,56 @@
 #ifndef DEV_FOLLOWER_FOLLOWER_H_
 #define DEV_FOLLOWER_FOLLOWER_H_
 
-#include "lhc_interface.h"
+#include <map>
+#include <iostream>
+
+#include "follow_intf.h"
+#include "../dev.h"
+
+class PLC_LHC_STAT;
 
 class Follower {
  public:
-  Follower();
-  ~Follower();
-  int ConnectInterface(LhcInterface *lhc_intf);
+  Follower(): status_(PLC_DONE), enable_(true), alarm_status_(0),
+      follow_intf_(NULL), intf_type_(-1) {}
+
+  ~Follower() {
+    if (follow_intf_) {
+      delete follow_intf_;
+    }
+  }
+
+  void SetFollowIntf(FollowIntf *follow_intf, int intf_type) {
+    follow_intf_ = follow_intf;
+    intf_type_ = intf_type;
+  }
+
+  void SetEnable(bool enable) {
+    enable_ = enable;
+  }
+
   int FollowTo(double height);
-  int IncrFollowTo(double height, double time);
+  int FollowGraduallyTo(double height, double time);
   int LiftTo(double height);
-  void Update();
+
+  void MoveUp();
+  void MoveDown();
+  void Move(double height, bool abs);
+  void MoveStop();
+  void Home();
+  void Calibrate();
+
+  void UpdateCfg();
+  void UpdateStatus(PLC_LHC_STAT &lhc_stat);
+
+  int status_;
+  bool enable_;
+  unsigned int alarm_status_;
+  static std::map<int, int> pos_alarmid_map;
 
  private:
-  LhcInterface *lhc_intf_;
-  LHC_STATUS status_;
+  FollowIntf *follow_intf_;
+  int intf_type_;
 };
 
 #endif
