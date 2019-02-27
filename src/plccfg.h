@@ -10,7 +10,6 @@
 //      LHC_FOLLOW_CUTTING
 //      LHC_FOLLOW_FIRST
 //      LHC_PROGRESSIVE_FIRST
-//
 
 #define CRAFT_LAYERS 20 
 #define STRIPING_LAYER_INDEX 18
@@ -224,19 +223,16 @@ class DelayArgs {
   }
 };
 
-class PlcGlobalArgs {
- public:
-  double open_gas_delay_;
-  double switch_gas_delay_;
+struct PlcGlobalArgs {
+  double open_gas_delay;
+  double switch_gas_delay;
 };
 
-class PlcArgs {
- public:
-  ProcessArgs process_args__;
-  GasArgs gas_args_;
-  LaserArgs laser_args_;
-  DelayArgs delay_args_;
-
+struct PlcArgs {
+  ProcessArgs process_args;
+  GasArgs gas_args;
+  LaserArgs laser_args;
+  DelayArgs delay_args;
 };
 
 #endif

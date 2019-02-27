@@ -11,8 +11,8 @@
 #include "plc.h"
 
 #define MODBUS_REGISTER_SIZE 50
-#define IO_PORT_SIZE 32 
-#define JOB_SIZE 100 
+#define IO_PORT_SIZE 32
+#define JOB_SIZE 100
 
 enum MB_REGISTER_TYPE {
   MB_REGISTER_BITS,
