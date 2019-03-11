@@ -26,9 +26,11 @@ int Gas::Open(int gas_id) {
     ;
   } else {
     if (current_gas_ < 0) {
-      ret = GAS_OPEN_FIRST_DELAY;
+      ret = GAS_OPEN_DELAY_FIRST;
     } else if (current_gas_ != gas_id) {
-      ret = GAS_OPEN_SWITCH_DELAY;
+      ret = GAS_OPEN_DELAY_SWITCH;
+    } else {
+      ret = GAS_OPEN_DELAY;
     }
     current_gas_ = gas_id;
     SetGasStatus(gas_id, 1);

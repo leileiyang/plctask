@@ -224,6 +224,7 @@ class DelayArgs {
 };
 
 struct PlcGlobalArgs {
+  double first_open_gas_delay;
   double open_gas_delay;
   double switch_gas_delay;
 };

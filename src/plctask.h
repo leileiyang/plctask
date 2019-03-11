@@ -88,7 +88,6 @@ class PlcTask {
   std::vector<PlcArgs> plc_args_;
 
   Gas gas_;
-  bool gas_delay_;
   int OpenGas(int gas_id);
   int OpenCuttingGas(int level);
   int SetCuttingPressure(int level);

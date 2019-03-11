@@ -27,7 +27,6 @@ PlcTask::PlcTask(double sleep_time):
     task_eager_(0),
     current_layer_(0),
     plc_args_(CRAFT_LAYERS, PlcArgs()),
-    gas_delay_(false),
     delay_timeout_(0.),
     delay_left_(0.) {
     
@@ -364,6 +363,7 @@ int PlcTask::Execute() {
       delay_left_ = delay_timeout_ - etime();
       if (etime() >= delay_timeout_) {
         exec_state_ = PLC_TASK_EXEC_DONE;
+        delay_timeout_ = 0;
         delay_left_ = 0;
       }
       break;
@@ -404,7 +404,7 @@ int PlcTask::CheckPostconditions(NMLmsg *cmd) {
                           }
       break;
     case GAS_OPEN_AUTO_TYPE:
-      if (gas_delay_) {
+      if (delay_timeout_ > 0) {
         return PLC_TASK_EXEC_WAITING_FOR_DELAY;
       } else {
         return PLC_TASK_EXEC_DONE;
@@ -651,17 +651,16 @@ int PlcTask::OpenGas(int gas_id) {
 }
 
 int PlcTask::OpenCuttingGas(int level) {
-  gas_delay_ = false;
   int ret = gas_.Open(plc_args_[current_layer_].gas_args.gas_[level]);
   if (ret < 0) {
     return -1;
   } else {
-    if (ret == GAS_OPEN_FIRST_DELAY) {
-      gas_delay_ = true;
-      delay_timeout_ = etime() + plc_global_args_.open_gas_delay;
-    } else if (ret == GAS_OPEN_SWITCH_DELAY) {
-      gas_delay_ = true;
+    if (ret == GAS_OPEN_DELAY_FIRST) {
+      delay_timeout_ = etime() + plc_global_args_.first_open_gas_delay;
+    } else if (ret == GAS_OPEN_DELAY_SWITCH) {
       delay_timeout_ = etime() + plc_global_args_.switch_gas_delay;
+    } else if (ret == GAS_OPEN_DELAY) {
+      delay_timeout_ = etime() + plc_global_args_.open_gas_delay;
     }
   }
   return 0;
