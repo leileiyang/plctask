@@ -17,3 +17,14 @@ add_custom_target (
 
 add_library(plcmsg SHARED interpl.cc plc_nml.cc)
 add_dependencies (plcmsg generate-msg-cc)
+
+install (TARGETS plcmsg DESTINATION /usr/local/lib
+  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+              GROUP_READ GROUP_EXECUTE
+              WORLD_READ WORLD_EXECUTE)
+
+file (GLOB PLC_HEADERS
+  "*.h"
+  "*.hh")
+
+install (FILES ${PLC_HEADERS} DESTINATION /usr/local/include/plcmsg)
