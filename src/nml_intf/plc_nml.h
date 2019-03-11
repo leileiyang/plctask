@@ -157,12 +157,15 @@ class JOB_ABORT_MSG: public PLC_CMD_MSG {
   void update(CMS *cms);
 };
 
+/*************gas command message****************/
+
 class GAS_OPEN: public PLC_CMD_MSG {
  public:
   GAS_OPEN();
   void update(CMS *cms);
 
   int gas_id_;
+  double pressure_;
 };
 
 class GAS_OPEN_AUTO: public PLC_CMD_MSG {
@@ -181,7 +184,14 @@ class GAS_PRESSURE_AUTO: public PLC_CMD_MSG {
   int level_;
 };
 
+class GAS_CLOSE: public PLC_CMD_MSG {
+ public:
+  GAS_CLOSE();
+  void update(CMS *cms);
 
+};
+
+/*************lhc command message****************/
 
 class LHC_FOLLOW: public PLC_CMD_MSG {
  public:
@@ -218,6 +228,8 @@ class LHC_AXIS_HOLD: public PLC_CMD_MSG {
   LHC_AXIS_HOLD();
   void update(CMS *cms);
 };
+
+/*************laser command message****************/
 
 class LASER_ON_MANUAL: public PLC_CMD_MSG {
  public:
@@ -294,6 +306,8 @@ class IO_CFG_MSG: public PLC_CMD_MSG {
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(short, port_no, IO_PORT_SIZE)
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(short, func_id, IO_PORT_SIZE)
 };
+
+/*************delay command message****************/
 
 class DELAY_BLOW_AUTO: public PLC_CMD_MSG {
  public:
