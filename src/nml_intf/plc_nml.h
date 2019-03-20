@@ -144,7 +144,7 @@ class PLC_STAT: public PLC_STAT_MSG {
 
   int job_id_;
   int plc_cmd_id_;
-
+  PLC_GAS_STAT gas_stat_;
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, modbus_bits, MODBUS_REGISTER_SIZE)
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, modbus_input_bits, MODBUS_REGISTER_SIZE)
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, modbus_registers, MODBUS_REGISTER_SIZE)

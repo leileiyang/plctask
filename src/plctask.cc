@@ -424,6 +424,7 @@ int PlcTask::UpdateTaskStatus() {
     error_msg.error[NML_ERROR_LEN - 1] = 0;
     plc_err_buffer_->write(error_msg);
   }
+  gas_.UpdateStatus(plc_status_->gas_stat_);
   return 0;
 }
 
