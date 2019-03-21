@@ -3,7 +3,6 @@
 
 #include "gas_intf.h"
 
-
 class DemoGas: public GasIntf {
  public:
   virtual int Open(int) {

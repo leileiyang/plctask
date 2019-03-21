@@ -11,6 +11,8 @@
 
 #include "nml_intf/plc_nml.h"
 
+#include "dev/gas/demo_gas.h"
+
 
 PlcTask::PlcTask(double sleep_time):
     exec_state_(PLC_TASK_EXEC_DONE),
@@ -139,6 +141,13 @@ void PlcTask::Shutdown() {
   }
 }
 
+int PlcTask::InitDevices() {
+  // gas device init
+  DemoGas *demo_gas = new DemoGas;
+  gas_.SetIntf(demo_gas, GAS_INTF_DEMO);
+  return 0;
+}
+
 bool PlcTask::Run() {
   //double start_time = etime();
   //double end_time = 0;
@@ -240,6 +249,9 @@ int PlcTask::TaskIssueCommand(NMLmsg *cmd) {
         retval = -1;
       }
       break;
+    case GAS_CLOSE_TYPE:
+      retval = gas_.Close();
+      break;
     case GAS_OPEN_TYPE:
       retval = OpenGas(((GAS_OPEN *)cmd)->gas_id_);
       break;
@@ -316,6 +328,7 @@ int PlcTask::Plan() {
     case PLC_EXEC_JOB_TYPE:
     case JOB_ABORT_MSG_TYPE:
     case GAS_OPEN_TYPE:
+    case GAS_CLOSE_TYPE:
     case MODBUS_INIT_MSG_TYPE:
     case MODBUS_READ_MSG_TYPE:
     case MODBUS_WRITE_MSG_TYPE:

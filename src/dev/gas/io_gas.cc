@@ -16,7 +16,6 @@ int IoGas::Open(int gas_id) {
         TurnOffPressureValve();
       }
       working_gas_ = it->second;
-      TurnOnPower();
       Open();
     }
     return GAS_OP_OK;
@@ -26,6 +25,7 @@ int IoGas::Open(int gas_id) {
 void IoGas::Open() {
   TurnOnMasterValve();
   TurnOnPressureValve();
+  TurnOnPower();
   // to do: open gas
 }
 

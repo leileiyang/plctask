@@ -30,6 +30,7 @@ class PlcTask {
   bool Run();
   void Shutdown();
   int Startup(std::string plc_nmlfile);
+  int InitDevices();
 
  protected:
   PLC_TASK_EXEC_ENUM exec_state_;
@@ -81,6 +82,7 @@ class PlcTask {
   int ExecuteJob(int job_id);
   int JobAbort();
   char error_[256];
+
 
   IoDevice out_dev_;
   int current_layer_;
