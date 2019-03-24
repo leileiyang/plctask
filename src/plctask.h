@@ -90,14 +90,14 @@ class PlcTask {
   std::vector<PlcArgs> plc_args_;
 
   Gas gas_;
-  int OpenGas(int gas_id);
-  int OpenCuttingGas(int level);
-  int SetCuttingPressure(int level);
+  int OpenGas(int gas_id, double pressure);
+  int OpenGasAuto(int level);
+  int SetPressureAuto(int level);
 
   double delay_timeout_;
   double delay_left_;
-  int CuttingStay(int level);
-  int CuttingBlow(int level);
+  int CuttingStayAuto(int level);
+  int CuttingBlowAuto(int level);
 
   Laser laser_;
   int LaserOn();

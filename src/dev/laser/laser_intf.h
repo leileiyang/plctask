@@ -1,6 +1,13 @@
 #ifndef DEV_LASER_INTF_H_
 #define DEV_LASER_INTF_H_
 
+enum LASER_INTF_ENUM {
+  LASER_INTF_DEMO,
+  LASER_INTF_IO,
+  LASER_INTF_MODBUS,
+  LASER_INTF_OTHER,
+};
+
 class LaserIntf {
  public:
   virtual int LaserOn() = 0;

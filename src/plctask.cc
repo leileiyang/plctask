@@ -12,7 +12,7 @@
 #include "nml_intf/plc_nml.h"
 
 #include "dev/gas/demo_gas.h"
-
+#include "dev/laser/demo_laser.h"
 
 PlcTask::PlcTask(double sleep_time):
     exec_state_(PLC_TASK_EXEC_DONE),
@@ -142,6 +142,9 @@ void PlcTask::Shutdown() {
 }
 
 int PlcTask::InitDevices() {
+  // laser device init
+  DemoLaser *demo_laser = new DemoLaser;
+  laser_.SetIntf(demo_laser, LASER_INTF_DEMO);
   // gas device init
   DemoGas *demo_gas = new DemoGas;
   gas_.SetIntf(demo_gas, GAS_INTF_DEMO);
@@ -250,22 +253,23 @@ int PlcTask::TaskIssueCommand(NMLmsg *cmd) {
       }
       break;
     case GAS_CLOSE_TYPE:
+      rcs_print("Close the current gas.\n");
       retval = gas_.Close();
       break;
     case GAS_OPEN_TYPE:
-      retval = OpenGas(((GAS_OPEN *)cmd)->gas_id_);
+      retval = OpenGas(((GAS_OPEN *)cmd)->gas_id_, ((GAS_OPEN *)cmd)->pressure_);
       break;
     case GAS_OPEN_AUTO_TYPE:
-      retval = OpenCuttingGas(((GAS_OPEN_AUTO *)cmd)->level_);
+      retval = OpenGasAuto(((GAS_OPEN_AUTO *)cmd)->level_);
       break;
     case GAS_PRESSURE_AUTO_TYPE:
-      retval = SetCuttingPressure(((GAS_PRESSURE_AUTO *)cmd)->level_);
+      retval = SetPressureAuto(((GAS_PRESSURE_AUTO *)cmd)->level_);
       break;
     case DELAY_BLOW_AUTO_TYPE:
-      retval = CuttingBlow(((DELAY_BLOW_AUTO *)cmd)->level_);
+      retval = CuttingBlowAuto(((DELAY_BLOW_AUTO *)cmd)->level_);
       break;
     case DELAY_STAY_AUTO_TYPE:
-      retval = CuttingStay(((DELAY_STAY_AUTO *)cmd)->level_);
+      retval = CuttingStayAuto(((DELAY_STAY_AUTO *)cmd)->level_);
       break;
     case LASER_ON_TYPE:
       retval = LaserOn();
@@ -438,6 +442,7 @@ int PlcTask::UpdateTaskStatus() {
     plc_err_buffer_->write(error_msg);
   }
   gas_.UpdateStatus(plc_status_->gas_stat_);
+  laser_.UpdateStatus(plc_status_->laser_stat_);
   return 0;
 }
 
@@ -659,12 +664,15 @@ int PlcTask::ModbusWrite(NMLmsg *cmd) {
   return rc;
 }
 
-int PlcTask::OpenGas(int gas_id) {
+int PlcTask::OpenGas(int gas_id, double pressure) {
+  rcs_print("Open gas id: %d\n", gas_id);
   gas_.Open(gas_id);
+  rcs_print("Set gas pressure %f\n", pressure);
+  gas_.SetPressure(gas_id, pressure);
   return 0;
 }
 
-int PlcTask::OpenCuttingGas(int level) {
+int PlcTask::OpenGasAuto(int level) {
   int ret = gas_.Open(plc_args_[current_layer_].gas_args.gas_[level]);
   if (ret < 0) {
     return -1;
@@ -680,18 +688,18 @@ int PlcTask::OpenCuttingGas(int level) {
   return 0;
 }
 
-int PlcTask::SetCuttingPressure(int level) {
+int PlcTask::SetPressureAuto(int level) {
   return gas_.SetPressure(plc_args_[current_layer_].gas_args.gas_[level],
       plc_args_[current_layer_].gas_args.pressure_[level]);
 
 }
 
-int PlcTask::CuttingStay(int level) {
+int PlcTask::CuttingStayAuto(int level) {
   delay_timeout_ = etime() + plc_args_[current_layer_].delay_args.stay_[level];
   return 0;
 }
 
-int PlcTask::CuttingBlow(int level) {
+int PlcTask::CuttingBlowAuto(int level) {
   if (plc_args_[current_layer_].delay_args.blow_enable_[level]) {
     delay_timeout_ = etime() + \
         plc_args_[current_layer_].delay_args.laser_off_blow_time_[level];

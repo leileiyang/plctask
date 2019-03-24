@@ -46,9 +46,20 @@ class PLC_LHC_STAT {
   unsigned int alarm_status_;
 };
 
+class PLC_LASER_STAT {
+ public:
+  char on_;
+  char red_light_;
+  char shutter_;
+  double power_;
+  double frequency_;
+  double pwm_;
+  double type_;
+};
+
 class PLC_STAT_MSG: public RCS_STAT_MSG {
  public:
-  PLC_STAT_MSG(NMLTYPE t, size_t s): RCS_STAT_MSG(t, s) {};
+  PLC_STAT_MSG(NMLTYPE t, size_t s): RCS_STAT_MSG(t, s) {}
 
   void update(CMS *cms);
 };
@@ -145,6 +156,7 @@ class PLC_STAT: public PLC_STAT_MSG {
   int job_id_;
   int plc_cmd_id_;
   PLC_GAS_STAT gas_stat_;
+  PLC_LASER_STAT laser_stat_;
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, modbus_bits, MODBUS_REGISTER_SIZE)
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned char, modbus_input_bits, MODBUS_REGISTER_SIZE)
   DECLARE_NML_DYNAMIC_LENGTH_ARRAY(unsigned short, modbus_registers, MODBUS_REGISTER_SIZE)
